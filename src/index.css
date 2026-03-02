@@ -1,0 +1,98 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  /* Couleurs primaires */
+  --primary: #00427E;
+  --primary-light: #0066CC;
+  --primary-dark: #002F5A;
+  --primary-gradient: linear-gradient(135deg, #00427E 0%, #0066CC 100%);
+  
+  /* Couleurs d'accent */
+  --accent: #FF6B35;
+  --accent-light: #FF8C61;
+  --accent-dark: #E5522B;
+  
+  /* Couleurs de succès/info */
+  --success: #20C997;
+  --info: #00A8E8;
+  --warning: #FFB800;
+  --danger: #EF4444;
+  
+  /* Couleurs neutres */
+  --neutral-900: #1F2937;
+  --neutral-800: #374151;
+  --neutral-700: #4B5563;
+  --neutral-600: #6B7280;
+  --neutral-500: #9CA3AF;
+  --neutral-400: #D1D5DB;
+  --neutral-300: #E5E7EB;
+  --neutral-200: #F3F4F6;
+  --neutral-100: #F9FAFB;
+  --white: #FFFFFF;
+  
+  /* Ombres */
+  --shadow-sm: 0 1px 2px rgba(0, 66, 126, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 66, 126, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 66, 126, 0.15);
+  --shadow-xl: 0 20px 25px rgba(0, 66, 126, 0.2);
+  
+  /* Typographie */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light;
+  color: var(--neutral-900);
+  background-color: var(--white);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+#root {
+  width: 100%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--neutral-900);
+}
+
+a {
+  font-weight: 500;
+  color: var(--primary);
+  text-decoration: inherit;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--primary-light);
+}
+
+button {
+  font-family: inherit;
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
