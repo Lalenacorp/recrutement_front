@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Search, Users, Briefcase, TrendingUp, Award, ArrowRight, Sparkles, Star, CheckCircle, Shield, Zap, Target, FileCheck, ThumbsUp, Building2, Rocket } from 'lucide-react';
+import { Search, Users, Briefcase, TrendingUp, Award, ArrowRight, Sparkles, Star, CheckCircle, Shield, Zap, Target, FileCheck, Building2 } from 'lucide-react';
 
 const Home = () => {
   const navigate = useNavigate();

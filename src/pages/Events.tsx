@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, MapPin, Clock, Users, Globe, Building, TrendingUp, Sparkles } from 'lucide-react';
+import { Calendar, MapPin, Clock, Globe, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { EventResponse } from '../types';
 import { listPublicEvents } from '../api/eventApi';
@@ -8,7 +8,7 @@ const Events = () => {
   const [events, setEvents] = useState<EventResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [filterType, setFilterType] = useState<'all' | 'online' | 'onsite' | 'upcoming'>('all');
+  const [filterType] = useState<'all' | 'online' | 'onsite' | 'upcoming'>('all');
 
   useEffect(() => {
     const load = async () => {
@@ -40,19 +40,6 @@ const Events = () => {
     return true;
   });
 
-  // Calculer les stats
-  const stats = {
-    total: events.length,
-    online: events.filter(e => e.online).length,
-    onsite: events.filter(e => !e.online).length,
-    thisMonth: events.filter(e => {
-      if (!e.startAt) return false;
-      const eventDate = new Date(e.startAt);
-      const now = new Date();
-      return eventDate.getMonth() === now.getMonth() && eventDate.getFullYear() === now.getFullYear();
-    }).length
-  };
-
   // Déterminer le statut de l'événement
   const getEventStatus = (event: EventResponse) => {
     if (!event.startAt) return 'upcoming';
@@ -65,18 +52,18 @@ const Events = () => {
     return 'upcoming';
   };
 
-  // const getStatusBadge = (status: string) => {
-  //   switch (status) {
-  //     case 'soon':
-  //       return <span className="event-badge event-badge-soon">Bientôt</span>;
-  //     case 'upcoming':
-  //       return <span className="event-badge event-badge-upcoming">À venir</span>;
-  //     case 'passed':
-  //       return <span className="event-badge event-badge-passed">Terminé</span>;
-  //     default:
-  //       return null;
-  //   }
-  // };
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'soon':
+        return <span className="event-badge event-badge-soon">Bientôt</span>;
+      case 'upcoming':
+        return <span className="event-badge event-badge-upcoming">À venir</span>;
+      case 'passed':
+        return <span className="event-badge event-badge-passed">Terminé</span>;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="events-page">
@@ -132,7 +119,7 @@ const Events = () => {
                 <div className="event-card-content">
                   <div className="event-header">
                     <h3>{ev.title}</h3>
-                    {/* {getStatusBadge(status)} */}
+                    {getStatusBadge(status)}
                   </div>
 
                   <p className="event-description">{ev.description}</p>
