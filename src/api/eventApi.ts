@@ -1,7 +1,7 @@
 import type { EventCreateRequest, EventResponse } from '../types';
 import { ApiError } from './authApi';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
 
 /**
  * Crée un nouveau événement (brouillon)

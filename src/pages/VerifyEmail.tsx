@@ -19,7 +19,7 @@ const VerifyEmail = () => {
       }
 
       try {
-        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
         // Selon le chemin, on choisit les endpoints à essayer.
         // /api?token=... : lien générique, on tente d'abord employeur puis candidat.
         // /api/auth/verify-email?token=... : employeur uniquement.
