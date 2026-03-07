@@ -51,9 +51,10 @@ const VerifyEmail = () => {
               if (data && typeof data.message === 'string' && data.message.trim().length > 0) {
                 successMessage = `${data.message} Vous pouvez maintenant vous connecter.`;
               }
-            } else {
+            } else if (contentType.includes('text/plain')) {
+              // Seulement si c'est du texte brut, pas du HTML
               const text = await response.text();
-              if (text && text.trim().length > 0) {
+              if (text && text.trim().length > 0 && !text.includes('<html') && !text.includes('<!doctype')) {
                 successMessage = `${text} Vous pouvez maintenant vous connecter.`;
               }
             }

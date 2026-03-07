@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
   LayoutDashboard, 
@@ -30,6 +31,7 @@ type ContentType = 'contest' | 'event' | 'opportunity';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [activeMenu, setActiveMenu] = useState<MenuItem>('dashboard');
   const [stats, setStats] = useState<PlatformStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -93,7 +95,7 @@ const AdminDashboard = () => {
     }
   };
 
-
+  // Charger les stats au montage du composant
   useEffect(() => {
     loadStats();
   }, []);
@@ -113,6 +115,11 @@ const AdminDashboard = () => {
       const data = await adminApi.getPlatformStats();
       setStats(data);
     } catch (err: any) {
+      // Si erreur 401, rediriger vers login
+      if (err.statusCode === 401) {
+        navigate('/login');
+        return;
+      }
       setError(err.message || 'Erreur lors du chargement des statistiques');
       console.error('Erreur:', err);
     } finally {
@@ -692,6 +699,12 @@ const AdminDashboard = () => {
       </form>
     </div>
   );
+
+  // Vérification de l'authentification avant le rendu
+  const token = localStorage.getItem('token');
+  if (!user || user.role !== 'admin' || !token) {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <div className="admin-layout">
