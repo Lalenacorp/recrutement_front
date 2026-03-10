@@ -17,16 +17,18 @@ import {
   Lock,
   Eye,
   Archive,
-  Send
+  Send,
+  CheckCircle2,
+  XCircle
 } from 'lucide-react';
-import { adminApi, type PlatformStats } from '../api/adminApi';
+import { adminApi, type PlatformStats, type AdminUserSummary } from '../api/adminApi';
 import { createContest, listContestsAdmin, publishContest, archiveContest } from '../api/contestApi';
 import { createEvent, listEventsAdmin, publishEvent, archiveEvent } from '../api/eventApi';
 import type { ContestResponse, EventResponse } from '../types';
 import ChangePasswordForm from '../components/ChangePasswordForm';
 import ConfirmModal from '../components/ConfirmModal';
 
-type MenuItem = 'dashboard' | 'users' | 'jobs' | 'applications' | 'contests' | 'events' | 'opportunities';
+type MenuItem = 'dashboard' | 'users' | 'contests' | 'events' | 'opportunities';
 type ContentType = 'contest' | 'event' | 'opportunity';
 
 const AdminDashboard = () => {
@@ -40,6 +42,13 @@ const AdminDashboard = () => {
   const [showContentForm, setShowContentForm] = useState(false);
   const [contentType, setContentType] = useState<ContentType>('contest');
   
+  // États pour la gestion des utilisateurs
+  const [users, setUsers] = useState<AdminUserSummary[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [usersError, setUsersError] = useState<string | null>(null);
+  const [userFilter, setUserFilter] = useState<'all' | 'employee' | 'employer'>('all');
+  const [userSearch, setUserSearch] = useState('');
+
   // États pour la gestion des concours
   const [contests, setContests] = useState<ContestResponse[]>([]);
   const [loadingContests, setLoadingContests] = useState(false);
@@ -105,8 +114,10 @@ const AdminDashboard = () => {
       loadContests();
     } else if (activeMenu === 'events') {
       loadEvents();
+    } else if (activeMenu === 'users') {
+      loadUsers(userFilter);
     }
-  }, [activeMenu]);
+  }, [activeMenu, userFilter]);
 
   const loadStats = async () => {
     try {
@@ -138,6 +149,20 @@ const AdminDashboard = () => {
       console.error('Erreur:', err);
     } finally {
       setLoadingContests(false);
+    }
+  };
+
+  const loadUsers = async (filter: 'all' | 'employee' | 'employer') => {
+    try {
+      setLoadingUsers(true);
+      setUsersError(null);
+      const data = await adminApi.getUsers(filter);
+      setUsers(data);
+    } catch (err: any) {
+      setUsersError(err.message || 'Erreur lors du chargement des utilisateurs');
+      console.error('Erreur lors du chargement des utilisateurs:', err);
+    } finally {
+      setLoadingUsers(false);
     }
   };
 
@@ -732,22 +757,6 @@ const AdminDashboard = () => {
             <span>Utilisateurs</span>
           </button>
 
-          <button 
-            className={`nav-item ${activeMenu === 'jobs' ? 'active' : ''}`}
-            onClick={() => setActiveMenu('jobs')}
-          >
-            <Briefcase size={20} />
-            <span>Offres d'emploi</span>
-          </button>
-
-          <button 
-            className={`nav-item ${activeMenu === 'applications' ? 'active' : ''}`}
-            onClick={() => setActiveMenu('applications')}
-          >
-            <FileText size={20} />
-            <span>Candidatures</span>
-          </button>
-
           <div className="nav-divider"></div>
 
           <button 
@@ -1020,39 +1029,127 @@ const AdminDashboard = () => {
         {activeMenu === 'users' && (
           <div className="admin-dashboard-content">
             <div className="dashboard-header-section">
-              <h1>Gestion des utilisateurs</h1>
-              <p className="text-muted">Voir et gérer les comptes utilisateurs</p>
+              <div>
+                <h1>Gestion des utilisateurs</h1>
+                <p className="text-muted">Voir et gérer les comptes candidats et employeurs</p>
+              </div>
             </div>
-            <div className="empty-state">
-              <Users size={48} />
-              <p>Fonctionnalité en cours de développement</p>
-            </div>
-          </div>
-        )}
 
-        {activeMenu === 'jobs' && (
-          <div className="admin-dashboard-content">
-            <div className="dashboard-header-section">
-              <h1>Gestion des offres d'emploi</h1>
-              <p className="text-muted">Modérer et gérer les offres publiées</p>
+            <div className="users-filters">
+              <div className="users-filter-tabs">
+                <button
+                  className={`btn btn-sm ${userFilter === 'all' ? 'btn-primary' : 'btn-outline'}`}
+                  onClick={() => setUserFilter('all')}
+                >
+                  Tous
+                </button>
+                <button
+                  className={`btn btn-sm ${userFilter === 'employee' ? 'btn-primary' : 'btn-outline'}`}
+                  onClick={() => setUserFilter('employee')}
+                >
+                  Candidats
+                </button>
+                <button
+                  className={`btn btn-sm ${userFilter === 'employer' ? 'btn-primary' : 'btn-outline'}`}
+                  onClick={() => setUserFilter('employer')}
+                >
+                  Employeurs
+                </button>
+              </div>
+              <div className="users-search">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Rechercher par nom, email ou entreprise..."
+                  value={userSearch}
+                  onChange={(e) => setUserSearch(e.target.value)}
+                />
+              </div>
             </div>
-            <div className="empty-state">
-              <Briefcase size={48} />
-              <p>Fonctionnalité en cours de développement</p>
-            </div>
-          </div>
-        )}
 
-        {activeMenu === 'applications' && (
-          <div className="admin-dashboard-content">
-            <div className="dashboard-header-section">
-              <h1>Gestion des candidatures</h1>
-              <p className="text-muted">Voir l'état des candidatures</p>
-            </div>
-            <div className="empty-state">
-              <FileText size={48} />
-              <p>Fonctionnalité en cours de développement</p>
-            </div>
+            {loadingUsers && (
+              <div className="loading-message">
+                <div className="spinner"></div>
+                <p>Chargement des utilisateurs...</p>
+              </div>
+            )}
+
+            {usersError && !loadingUsers && (
+              <div className="error-message">
+                <p>{usersError}</p>
+                <button className="btn btn-primary" onClick={() => loadUsers(userFilter)}>
+                  Réessayer
+                </button>
+              </div>
+            )}
+
+            {!loadingUsers && !usersError && (
+              <>
+                {users.length === 0 ? (
+                  <div className="empty-state">
+                    <Users size={48} />
+                    <p>Aucun utilisateur trouvé pour ce filtre</p>
+                  </div>
+                ) : (
+                  <div className="users-table-wrapper">
+                    <table className="users-table">
+                      <thead>
+                        <tr>
+                          <th>Type</th>
+                          <th>Nom</th>
+                          <th>Email</th>
+                          <th>Téléphone</th>
+                          <th>Entreprise</th>
+                          <th>Vérifié</th>
+                          <th>Inscription</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {users
+                          .filter((u) => {
+                            if (!userSearch.trim()) return true;
+                            const query = userSearch.toLowerCase();
+                            const fullName = `${u.firstName ?? ''} ${u.lastName ?? ''}`.toLowerCase();
+                            const company = (u.companyName ?? '').toLowerCase();
+                            return (
+                              u.email.toLowerCase().includes(query) ||
+                              fullName.includes(query) ||
+                              company.includes(query)
+                            );
+                          })
+                          .map((user) => (
+                            <tr key={`${user.type}-${user.id}`}>
+                              <td>
+                                <span className={`badge badge-${user.type === 'EMPLOYEE' ? 'info' : 'secondary'}`}>
+                                  {user.type === 'EMPLOYEE' ? 'Candidat' : 'Employeur'}
+                                </span>
+                              </td>
+                              <td>{`${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || '-'}</td>
+                              <td>{user.email}</td>
+                              <td>{user.phone || '-'}</td>
+                              <td>{user.companyName || (user.type === 'EMPLOYEE' ? '—' : '-')}</td>
+                              <td>
+                                {user.emailVerified ? (
+                                  <span className="status-chip status-success">
+                                    <CheckCircle2 size={16} />
+                                    Vérifié
+                                  </span>
+                                ) : (
+                                  <span className="status-chip status-warning">
+                                    <XCircle size={16} />
+                                    Non vérifié
+                                  </span>
+                                )}
+                              </td>
+                              <td>{new Date(user.createdAt).toLocaleDateString('fr-FR')}</td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         )}
 
