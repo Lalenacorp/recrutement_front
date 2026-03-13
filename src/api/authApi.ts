@@ -1,7 +1,7 @@
 import type { User } from '../types';
 import type { EmployerSignupRequest, EmployerResponse } from './types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080';
 
 export class ApiError extends Error {
   public status: number;
@@ -191,10 +191,35 @@ export const authApi = {
       console.log('Employee signup response status:', response.status);
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.log('Employee signup error:', errorData);
+        const errorText = await response.text();
+        console.log('Employee signup error (raw text):', errorText);
+
+        let errorData: any = {};
+        try {
+          errorData = errorText ? JSON.parse(errorText) : {};
+        } catch {
+          // si ce n'est pas du JSON, on utilisera directement le texte
+        }
+
+        let message =
+          errorData.message ||
+          errorData.error ||
+          (errorText && errorText.trim().length > 0 ? errorText : undefined);
+
+        if (!message && errorData.errors && typeof errorData.errors === 'object') {
+          const firstField = Object.keys(errorData.errors)[0];
+          const fieldMessages = firstField ? errorData.errors[firstField] : null;
+          if (Array.isArray(fieldMessages) && fieldMessages.length > 0) {
+            message = fieldMessages[0];
+          }
+        }
+
+        if (!message) {
+          message = 'Erreur lors de l\'inscription';
+        }
+
         throw new ApiError(
-          errorData.message || errorData.error || 'Erreur lors de l\'inscription',
+          message,
           response.status,
           errorData.errors
         );
@@ -271,7 +296,7 @@ export const authApi = {
         const errorText = await response.text();
         console.log('Employer signup error (raw text):', errorText);
         
-        let errorData;
+        let errorData: any;
         try {
           errorData = JSON.parse(errorText);
         } catch {
@@ -279,8 +304,25 @@ export const authApi = {
         }
         
         console.log('Employer signup error (parsed):', errorData);
+
+        let message =
+          errorData.message ||
+          errorData.error;
+
+        if (!message && errorData.errors && typeof errorData.errors === 'object') {
+          const firstField = Object.keys(errorData.errors)[0];
+          const fieldMessages = firstField ? errorData.errors[firstField] : null;
+          if (Array.isArray(fieldMessages) && fieldMessages.length > 0) {
+            message = fieldMessages[0];
+          }
+        }
+
+        if (!message) {
+          message = 'Erreur lors de l\'inscription';
+        }
+
         throw new ApiError(
-          errorData.message || errorData.error || 'Erreur lors de l\'inscription',
+          message,
           response.status,
           errorData.errors
         );

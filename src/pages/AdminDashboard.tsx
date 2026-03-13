@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { adminApi, type PlatformStats, type AdminUserSummary } from '../api/adminApi';
 import { createContest, listContestsAdmin, publishContest, archiveContest } from '../api/contestApi';
-import { createEvent, listEventsAdmin, publishEvent, archiveEvent } from '../api/eventApi';
+import { createEvent, listEventsAdmin, publishEvent, archiveEvent, updateEvent, deleteEvent } from '../api/eventApi';
 import type { ContestResponse, EventResponse } from '../types';
 import ChangePasswordForm from '../components/ChangePasswordForm';
 import ConfirmModal from '../components/ConfirmModal';
@@ -58,6 +58,7 @@ const AdminDashboard = () => {
   const [events, setEvents] = useState<EventResponse[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(false);
   const [eventError, setEventError] = useState<string | null>(null);
+  const [editingEventId, setEditingEventId] = useState<number | null>(null);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -197,8 +198,8 @@ const AdminDashboard = () => {
         // Convertir les dates en ISO 8601
         const startAtISO = formData.startDate ? new Date(formData.startDate).toISOString() : '';
         const endAtISO = formData.endDate ? new Date(formData.endDate).toISOString() : undefined;
-        
-        await createEvent({
+
+        const payload = {
           title: formData.title,
           description: formData.description,
           startAt: startAtISO,
@@ -211,16 +212,27 @@ const AdminDashboard = () => {
           capacity: formData.capacity ? parseInt(formData.capacity) : undefined,
           registrationRequired: formData.registrationRequired,
           coverImageUrl: formData.coverImageUrl || undefined,
-        });
+        };
+
+        if (editingEventId) {
+          await updateEvent(editingEventId, payload);
+        } else {
+          await createEvent(payload);
+        }
         
         // Recharger la liste des événements
         await loadEvents();
         
         // Fermer le formulaire et réinitialiser
         setShowContentForm(false);
+        setEditingEventId(null);
         resetFormData();
       } catch (err: any) {
-        alert('Erreur: ' + (err.message || 'Impossible de créer l\'événement'));
+        alert(
+          'Erreur: ' +
+          (err.message ||
+            (editingEventId ? 'Impossible de mettre à jour l\'événement' : 'Impossible de créer l\'événement'))
+        );
       } finally {
         setLoadingEvents(false);
       }
@@ -248,6 +260,46 @@ const AdminDashboard = () => {
       capacity: '',
       registrationRequired: false,
     });
+  };
+
+  const openEventEdit = (ev: EventResponse) => {
+    setContentType('event');
+    setActiveMenu('events');
+    setShowContentForm(true);
+    setEditingEventId(ev.id as number);
+    setFormData({
+      title: ev.title,
+      description: ev.description,
+      registrationUrl: '',
+      coverImageUrl: ev.coverImageUrl || '',
+      startDate: ev.startAt ? new Date(ev.startAt).toISOString().slice(0, 16) : '',
+      endDate: ev.endAt ? new Date(ev.endAt).toISOString().slice(0, 16) : '',
+      locationName: ev.locationName || '',
+      city: ev.city || '',
+      countryCode: ev.countryCode || '',
+      online: ev.online,
+      onlineUrl: ev.onlineUrl || '',
+      capacity: ev.capacity ? String(ev.capacity) : '',
+      registrationRequired: ev.registrationRequired,
+    });
+  };
+
+  const handleDeleteEvent = (eventId: number) => {
+    openConfirm(
+      'Êtes-vous sûr de vouloir supprimer définitivement cet événement ? Cette action est irréversible.',
+      async () => {
+        try {
+          setLoadingEvents(true);
+          await deleteEvent(eventId);
+          await loadEvents();
+        } catch (err: any) {
+          alert('Erreur: ' + (err.message || 'Impossible de supprimer l\'événement'));
+        } finally {
+          setLoadingEvents(false);
+        }
+      },
+      'Supprimer l\'événement'
+    );
   };
 
   const handlePublishContest = async (contestId: number) => {
@@ -812,10 +864,14 @@ const AdminDashboard = () => {
               </div>
               <button 
                 className="btn btn-primary"
-                onClick={() => setShowContentForm(!showContentForm)}
+                onClick={() => {
+                  setEditingEventId(null);
+                  resetFormData();
+                  setShowContentForm(!showContentForm);
+                }}
               >
                 <PlusCircle size={18} />
-                Ajouter
+                {activeMenu === 'events' ? 'Nouvel événement' : 'Ajouter'}
               </button>
             </div>
 
@@ -998,8 +1054,18 @@ const AdminDashboard = () => {
                               Archivé
                             </button>
                           )}
-                          <button className="btn btn-sm btn-outline">Modifier</button>
-                          <button className="btn btn-sm btn-danger">Supprimer</button>
+                          <button
+                            className="btn btn-sm btn-outline"
+                            onClick={() => openEventEdit(ev)}
+                          >
+                            Modifier
+                          </button>
+                          <button
+                            className="btn btn-sm btn-danger"
+                            onClick={() => handleDeleteEvent(ev.id as number)}
+                          >
+                            Supprimer
+                          </button>
                         </div>
                       </div>
                     ))}

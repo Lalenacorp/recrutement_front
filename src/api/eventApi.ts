@@ -46,6 +46,70 @@ export async function createEvent(request: EventCreateRequest): Promise<EventRes
   return response.json();
 }
 
+export async function updateEvent(id: number, request: EventCreateRequest): Promise<EventResponse> {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new ApiError('Non authentifié', 401);
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api/admin/events/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(request),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new ApiError(
+        errorData.message || errorData.error || 'Erreur lors de la mise à jour de l\'événement',
+        response.status,
+        errorData.errors
+      );
+    }
+
+    return await response.json();
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError('Erreur de connexion au serveur', 0);
+  }
+}
+
+export async function deleteEvent(id: number): Promise<void> {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new ApiError('Non authentifié', 401);
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api/admin/events/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new ApiError(
+        errorData.message || errorData.error || 'Erreur lors de la suppression de l\'événement',
+        response.status,
+        errorData.errors
+      );
+    }
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError('Erreur de connexion au serveur', 0);
+  }
+}
+
 /**
  * Publie un événement (change le statut de DRAFT à PUBLISHED)
  */

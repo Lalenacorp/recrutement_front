@@ -30,9 +30,34 @@ export const employeeApi = {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+        const errorText = await response.text();
+
+        let errorData: any = {};
+        try {
+          errorData = errorText ? JSON.parse(errorText) : {};
+        } catch {
+          // pas du JSON, on utilisera directement le texte
+        }
+
+        let message =
+          errorData.message ||
+          errorData.error ||
+          (errorText && errorText.trim().length > 0 ? errorText : undefined);
+
+        if (!message && errorData.errors && typeof errorData.errors === 'object') {
+          const firstField = Object.keys(errorData.errors)[0];
+          const fieldMessages = firstField ? errorData.errors[firstField] : null;
+          if (Array.isArray(fieldMessages) && fieldMessages.length > 0) {
+            message = fieldMessages[0];
+          }
+        }
+
+        if (!message) {
+          message = 'Erreur lors de l\'inscription';
+        }
+
         throw new ApiError(
-          errorData.message || 'Erreur lors de l\'inscription',
+          message,
           response.status,
           errorData.errors
         );

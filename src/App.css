@@ -2555,6 +2555,70 @@
   font-size: 1.05rem;
 }
 
+/* Admin - Users table */
+.users-table-wrapper {
+  overflow-x: auto;
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--neutral-200);
+  background: white;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 880px;
+  font-size: 0.9rem;
+}
+
+.users-table thead {
+  background: linear-gradient(90deg, #f3f4f6 0%, #e5e7eb 100%);
+}
+
+.users-table th,
+.users-table td {
+  padding: 0.9rem 1.1rem;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.users-table th {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--neutral-700);
+}
+
+.users-table tbody tr {
+  border-top: 1px solid var(--neutral-200);
+  transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.users-table tbody tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.users-table tbody tr:hover {
+  background-color: #edf2ff;
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.06);
+  transform: translateY(-1px);
+}
+
+.users-table td:first-child {
+  font-weight: 600;
+}
+
+.users-table td:nth-child(2),
+.users-table td:nth-child(3) {
+  color: var(--neutral-900);
+}
+
+.users-table td:nth-child(4),
+.users-table td:nth-child(5) {
+  color: var(--neutral-600);
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .jobs-header h1 {
