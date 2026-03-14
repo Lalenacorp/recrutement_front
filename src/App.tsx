@@ -32,6 +32,7 @@ function AppContent() {
           <Route path="/register" element={<Register />} />
           <Route path="/employer/register" element={<EmployerRegister />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/verify-email-employee" element={<VerifyEmail />} />
           {/* Permet de gérer les liens de vérification envoyés par l'API pour les employeurs :
              http://localhost:5173/api/auth/verify-email?token=... */}
           <Route path="/api/auth/verify-email" element={<VerifyEmail />} />

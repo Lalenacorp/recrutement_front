@@ -8,7 +8,6 @@ import {
   FileText, 
   Trophy, 
   Calendar, 
-  Lightbulb, 
   TrendingUp,
   Building2,
   CheckCircle,
@@ -28,8 +27,8 @@ import type { ContestResponse, EventResponse } from '../types';
 import ChangePasswordForm from '../components/ChangePasswordForm';
 import ConfirmModal from '../components/ConfirmModal';
 
-type MenuItem = 'dashboard' | 'users' | 'contests' | 'events' | 'opportunities';
-type ContentType = 'contest' | 'event' | 'opportunity';
+type MenuItem = 'dashboard' | 'users' | 'contests' | 'events';
+type ContentType = 'contest' | 'event';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -236,11 +235,6 @@ const AdminDashboard = () => {
       } finally {
         setLoadingEvents(false);
       }
-    } else {
-      // Pour opportunities (à implémenter plus tard)
-      console.log('Nouveau contenu publié:', contentType, formData);
-      setShowContentForm(false);
-      resetFormData();
     }
   };
 
@@ -556,7 +550,6 @@ const AdminDashboard = () => {
       <h3>
         {contentType === 'contest' && 'Nouveau concours'}
         {contentType === 'event' && 'Nouvel événement'}
-        {contentType === 'opportunity' && 'Nouvelle opportunité'}
       </h3>
       
       <form onSubmit={handleContentSubmit}>
@@ -739,32 +732,6 @@ const AdminDashboard = () => {
           </>
         )}
         
-        {contentType === 'opportunity' && (
-          <>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Date de début</label>
-                <input
-                  type="date"
-                  className="form-control"
-                  value={formData.startDate}
-                  onChange={(e) => setFormData({...formData, startDate: e.target.value})}
-                />
-              </div>
-              
-              <div className="form-group">
-                <label>Date de fin</label>
-                <input
-                  type="date"
-                  className="form-control"
-                  value={formData.endDate}
-                  onChange={(e) => setFormData({...formData, endDate: e.target.value})}
-                />
-              </div>
-            </div>
-          </>
-        )}
-        
         <div className="form-actions">
           <button type="button" className="btn btn-outline" onClick={() => setShowContentForm(false)}>
             Annuler
@@ -827,13 +794,6 @@ const AdminDashboard = () => {
             <span>Événements</span>
           </button>
 
-          <button 
-            className={`nav-item ${activeMenu === 'opportunities' ? 'active' : ''}`}
-            onClick={() => { setActiveMenu('opportunities'); setContentType('opportunity'); }}
-          >
-            <Lightbulb size={20} />
-            <span>Opportunités</span>
-          </button>
         </nav>
 
         <div className="sidebar-footer">
@@ -851,14 +811,13 @@ const AdminDashboard = () => {
       <main className="admin-main">
         {activeMenu === 'dashboard' && renderDashboard()}
         
-        {(activeMenu === 'contests' || activeMenu === 'events' || activeMenu === 'opportunities') && (
+        {(activeMenu === 'contests' || activeMenu === 'events') && (
           <div className="admin-dashboard-content">
             <div className="dashboard-header-section">
               <div>
                 <h1>
                   {activeMenu === 'contests' && 'Gestion des concours'}
                   {activeMenu === 'events' && 'Gestion des événements'}
-                  {activeMenu === 'opportunities' && 'Gestion des opportunités'}
                 </h1>
                 <p className="text-muted">Créer et gérer le contenu de la plateforme</p>
               </div>
@@ -1074,21 +1033,6 @@ const AdminDashboard = () => {
               </div>
             )}
 
-            {/* Opportunities placeholder */}
-            {activeMenu === 'opportunities' && (
-              <div className="content-list">
-                <div className="content-item-card">
-                  <div>
-                    <h3>Programme de Mentorat</h3>
-                    <p className="text-muted">Formation continue • Disponible</p>
-                  </div>
-                  <div className="content-item-actions">
-                    <button className="btn btn-sm btn-outline">Modifier</button>
-                    <button className="btn btn-sm btn-danger">Supprimer</button>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         )}
 
