@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Search, Users, Briefcase, TrendingUp, Award, ArrowRight, Sparkles, Star, CheckCircle, Shield, Zap, Target, FileCheck, Building2 } from 'lucide-react';
+import { Search, Users, Briefcase, TrendingUp, Award, ArrowRight, Sparkles, Star, CheckCircle, Shield, Zap, Target, FileCheck, Building2, GraduationCap } from 'lucide-react';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -339,6 +339,25 @@ const Home = () => {
             <button className="btn btn-light" onClick={() => navigate('/employer/register')}>
               <span>Commencer maintenant</span>
               <ArrowRight size={18} />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="study-canada-highlight">
+        <div className="container">
+          <div className="study-canada-highlight-content">
+            <div>
+              <div className="section-badge">Nouveau service</div>
+              <h2>Études au Canada — procédure CCA (Dakar)</h2>
+              <p>
+                Dossier pédagogique, frais, pièces à fournir et fiche de renseignement selon la
+                procédure CCA.
+              </p>
+            </div>
+            <button className="btn btn-primary" onClick={() => navigate('/etudes-canada')}>
+              <GraduationCap size={18} />
+              Commencer ma demande
             </button>
           </div>
         </div>

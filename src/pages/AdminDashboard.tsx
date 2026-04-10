@@ -18,17 +18,67 @@ import {
   Archive,
   Send,
   CheckCircle2,
-  XCircle
+  XCircle,
+  GraduationCap
 } from 'lucide-react';
-import { adminApi, type PlatformStats, type AdminUserSummary } from '../api/adminApi';
+import {
+  adminApi,
+  type PlatformStats,
+  type AdminUserSummary,
+  type PreInscriptionSummary,
+  type PreInscriptionDetail,
+  type PreInscriptionStatus,
+} from '../api/adminApi';
 import { createContest, listContestsAdmin, publishContest, archiveContest } from '../api/contestApi';
 import { createEvent, listEventsAdmin, publishEvent, archiveEvent, updateEvent, deleteEvent } from '../api/eventApi';
 import type { ContestResponse, EventResponse } from '../types';
 import ChangePasswordForm from '../components/ChangePasswordForm';
 import ConfirmModal from '../components/ConfirmModal';
 
-type MenuItem = 'dashboard' | 'users' | 'contests' | 'events';
+type MenuItem = 'dashboard' | 'users' | 'contests' | 'events' | 'preinscriptions';
 type ContentType = 'contest' | 'event';
+
+const PRE_INSCRIPTION_FIELD_LABELS: Record<string, string> = {
+  dateInscription: "Date d'inscription",
+  nom: 'Nom',
+  prenom: 'Prénom',
+  dateNaissance: 'Date de naissance',
+  sexe: 'Sexe',
+  lieuNaissance: 'Lieu de naissance',
+  adresse: 'Adresse',
+  numeroPasseport: 'N° passeport',
+  telephone: 'Téléphone',
+  email: 'Email',
+  telephoneUrgence: 'Tél. urgence',
+  situationMatrimoniale: 'Situation matrimoniale',
+  dernierDiplome: 'Dernier diplôme obtenu',
+  nomPere: 'Nom et prénom du père',
+  nomMere: 'Nom et prénom de la mère',
+  connuCCA: 'Connaissance de CCA',
+  formationSouhaitee: 'Formation souhaitée',
+  lyceeNom: 'Lycée — nom',
+  lyceeDiplome: 'Lycée — diplôme',
+  lyceeSerie: 'Lycée — série',
+  lyceePeriode: 'Lycée — période',
+  universiteNom: 'Université — nom',
+  universiteDiplome: 'Université — diplôme',
+  universiteFiliere: 'Université — filière',
+  universitePeriode: 'Université — période',
+  admissionCanada: 'Admission Canada (antécédent)',
+  admissionCanadaEtablissement: 'Admission — établissement',
+  admissionCanadaAnnee: 'Admission — année',
+  formationChoisie: 'Formation choisie (précision)',
+  aideAdmission: 'Aide pour admission',
+  dejaVisaCanada: 'Déjà déposé un visa Canada',
+  visaCanadaAnnee: 'Visa — année',
+  visaRefusRaison: 'Visa — raison du refus',
+};
+
+function formatPreInscriptionFieldValue(value: unknown): string {
+  if (value === null || value === undefined || value === '') return '—';
+  if (typeof value === 'object') return JSON.stringify(value);
+  return String(value);
+}
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -58,6 +108,14 @@ const AdminDashboard = () => {
   const [loadingEvents, setLoadingEvents] = useState(false);
   const [eventError, setEventError] = useState<string | null>(null);
   const [editingEventId, setEditingEventId] = useState<number | null>(null);
+
+  const [preInscriptions, setPreInscriptions] = useState<PreInscriptionSummary[]>([]);
+  const [loadingPreInscriptions, setLoadingPreInscriptions] = useState(false);
+  const [preInscriptionError, setPreInscriptionError] = useState<string | null>(null);
+  const [preInscriptionFilter, setPreInscriptionFilter] = useState<'all' | PreInscriptionStatus>('all');
+  const [preInscriptionDetail, setPreInscriptionDetail] = useState<PreInscriptionDetail | null>(null);
+  const [preInscriptionDetailOpen, setPreInscriptionDetailOpen] = useState(false);
+  const [loadingPreInscriptionDetail, setLoadingPreInscriptionDetail] = useState(false);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -116,6 +174,8 @@ const AdminDashboard = () => {
       loadEvents();
     } else if (activeMenu === 'users') {
       loadUsers(userFilter);
+    } else if (activeMenu === 'preinscriptions') {
+      loadPreInscriptions();
     }
   }, [activeMenu, userFilter]);
 
@@ -336,6 +396,58 @@ const AdminDashboard = () => {
     } finally {
       setLoadingEvents(false);
     }
+  };
+
+  const loadPreInscriptions = async () => {
+    try {
+      setLoadingPreInscriptions(true);
+      setPreInscriptionError(null);
+      const data = await adminApi.listPreInscriptions();
+      setPreInscriptions(data);
+    } catch (err: any) {
+      setPreInscriptionError(err.message || 'Erreur lors du chargement des pré-inscriptions');
+      console.error(err);
+    } finally {
+      setLoadingPreInscriptions(false);
+    }
+  };
+
+  const openPreInscriptionDetail = async (id: number) => {
+    setPreInscriptionDetailOpen(true);
+    setPreInscriptionDetail(null);
+    setLoadingPreInscriptionDetail(true);
+    try {
+      const detail = await adminApi.getPreInscription(id);
+      setPreInscriptionDetail(detail);
+    } catch (err: any) {
+      alert(err.message || 'Impossible de charger la fiche');
+      setPreInscriptionDetailOpen(false);
+    } finally {
+      setLoadingPreInscriptionDetail(false);
+    }
+  };
+
+  const closePreInscriptionDetail = () => {
+    setPreInscriptionDetailOpen(false);
+    setPreInscriptionDetail(null);
+  };
+
+  const handlePreInscriptionStatusChange = async (id: number, status: PreInscriptionStatus) => {
+    try {
+      const updated = await adminApi.updatePreInscriptionStatus(id, status);
+      setPreInscriptions((prev) => prev.map((p) => (p.id === id ? { ...p, ...updated } : p)));
+      setPreInscriptionDetail((d) =>
+        d && d.id === id ? { ...d, status, updatedAt: updated.updatedAt } : d
+      );
+    } catch (err: any) {
+      alert(err.message || 'Mise à jour impossible');
+    }
+  };
+
+  const preInscriptionStatusLabel = (s: PreInscriptionStatus) => {
+    if (s === 'PENDING') return 'En attente';
+    if (s === 'CONTACTED') return 'Contacté';
+    return 'Archivé';
   };
 
   const handlePublishEvent = async (eventId: number) => {
@@ -794,6 +906,14 @@ const AdminDashboard = () => {
             <span>Événements</span>
           </button>
 
+          <button
+            className={`nav-item ${activeMenu === 'preinscriptions' ? 'active' : ''}`}
+            onClick={() => setActiveMenu('preinscriptions')}
+          >
+            <GraduationCap size={20} />
+            <span>Pré-inscriptions Canada</span>
+          </button>
+
         </nav>
 
         <div className="sidebar-footer">
@@ -1036,6 +1156,144 @@ const AdminDashboard = () => {
           </div>
         )}
 
+        {activeMenu === 'preinscriptions' && (
+          <div className="admin-dashboard-content">
+            <div className="dashboard-header-section">
+              <div>
+                <h1>Pré-inscriptions — études Canada (CCA)</h1>
+                <p className="text-muted">
+                  Fiches envoyées depuis la page publique ; mettez à jour le statut après contact ou
+                  clôture du dossier.
+                </p>
+              </div>
+              <button type="button" className="btn btn-outline" onClick={() => loadPreInscriptions()}>
+                Actualiser
+              </button>
+            </div>
+
+            <div className="users-filters">
+              <div className="users-filter-tabs">
+                <button
+                  type="button"
+                  className={`btn btn-sm ${preInscriptionFilter === 'all' ? 'btn-primary' : 'btn-outline'}`}
+                  onClick={() => setPreInscriptionFilter('all')}
+                >
+                  Tous
+                </button>
+                <button
+                  type="button"
+                  className={`btn btn-sm ${preInscriptionFilter === 'PENDING' ? 'btn-primary' : 'btn-outline'}`}
+                  onClick={() => setPreInscriptionFilter('PENDING')}
+                >
+                  En attente
+                </button>
+                <button
+                  type="button"
+                  className={`btn btn-sm ${preInscriptionFilter === 'CONTACTED' ? 'btn-primary' : 'btn-outline'}`}
+                  onClick={() => setPreInscriptionFilter('CONTACTED')}
+                >
+                  Contactés
+                </button>
+                <button
+                  type="button"
+                  className={`btn btn-sm ${preInscriptionFilter === 'ARCHIVED' ? 'btn-primary' : 'btn-outline'}`}
+                  onClick={() => setPreInscriptionFilter('ARCHIVED')}
+                >
+                  Archivés
+                </button>
+              </div>
+            </div>
+
+            {loadingPreInscriptions && (
+              <div className="loading-message">
+                <div className="spinner"></div>
+                <p>Chargement des pré-inscriptions…</p>
+              </div>
+            )}
+
+            {preInscriptionError && !loadingPreInscriptions && (
+              <div className="error-message">
+                <p>{preInscriptionError}</p>
+                <button type="button" className="btn btn-primary" onClick={() => loadPreInscriptions()}>
+                  Réessayer
+                </button>
+              </div>
+            )}
+
+            {!loadingPreInscriptions && !preInscriptionError && (
+              <>
+                {preInscriptions.filter((p) => preInscriptionFilter === 'all' || p.status === preInscriptionFilter)
+                  .length === 0 ? (
+                  <div className="empty-state">
+                    <GraduationCap size={48} />
+                    <p>Aucune pré-inscription pour ce filtre</p>
+                  </div>
+                ) : (
+                  <div className="users-table-wrapper">
+                    <table className="users-table">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Nom</th>
+                          <th>Email</th>
+                          <th>Téléphone</th>
+                          <th>Formation</th>
+                          <th>Statut</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {preInscriptions
+                          .filter((p) => preInscriptionFilter === 'all' || p.status === preInscriptionFilter)
+                          .map((p) => (
+                            <tr key={p.id}>
+                              <td>{new Date(p.createdAt).toLocaleString('fr-FR')}</td>
+                              <td>
+                                {p.prenom} {p.nom}
+                              </td>
+                              <td>{p.email}</td>
+                              <td>{p.telephone}</td>
+                              <td className="preinscription-preview-cell">
+                                {p.formationPreview || '—'}
+                              </td>
+                              <td>
+                                <select
+                                  className="form-control preinscription-status-select"
+                                  value={p.status}
+                                  onChange={(e) =>
+                                    handlePreInscriptionStatusChange(
+                                      p.id,
+                                      e.target.value as PreInscriptionStatus
+                                    )
+                                  }
+                                  aria-label={`Statut pour ${p.prenom} ${p.nom}`}
+                                >
+                                  <option value="PENDING">{preInscriptionStatusLabel('PENDING')}</option>
+                                  <option value="CONTACTED">{preInscriptionStatusLabel('CONTACTED')}</option>
+                                  <option value="ARCHIVED">{preInscriptionStatusLabel('ARCHIVED')}</option>
+                                </select>
+                              </td>
+                              <td>
+                                <button
+                                  type="button"
+                                  className="btn btn-sm btn-outline"
+                                  onClick={() => openPreInscriptionDetail(p.id)}
+                                >
+                                  <Eye size={16} />
+                                  Fiche
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
         {activeMenu === 'users' && (
           <div className="admin-dashboard-content">
             <div className="dashboard-header-section">
@@ -1160,6 +1418,71 @@ const AdminDashboard = () => {
                 )}
               </>
             )}
+          </div>
+        )}
+
+        {preInscriptionDetailOpen && (
+          <div className="modal-overlay" onClick={closePreInscriptionDetail}>
+            <div
+              className="modal-content admin-preinscription-modal"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="modal-header">
+                <h2>
+                  {preInscriptionDetail
+                    ? `Fiche #${preInscriptionDetail.id} — ${preInscriptionDetail.prenom} ${preInscriptionDetail.nom}`
+                    : 'Chargement…'}
+                </h2>
+                <button type="button" className="modal-close" onClick={closePreInscriptionDetail}>
+                  ×
+                </button>
+              </div>
+              <div className="modal-body">
+                {loadingPreInscriptionDetail && (
+                  <div className="loading-message">
+                    <div className="spinner"></div>
+                    <p>Chargement de la fiche…</p>
+                  </div>
+                )}
+                {!loadingPreInscriptionDetail && preInscriptionDetail && (
+                  <>
+                    <div className="preinscription-modal-meta">
+                      <p>
+                        <strong>Reçue le</strong>{' '}
+                        {new Date(preInscriptionDetail.createdAt).toLocaleString('fr-FR')}
+                      </p>
+                      <p>
+                        <strong>Statut</strong>{' '}
+                        <select
+                          className="form-control preinscription-status-select"
+                          value={preInscriptionDetail.status}
+                          onChange={(e) =>
+                            handlePreInscriptionStatusChange(
+                              preInscriptionDetail.id,
+                              e.target.value as PreInscriptionStatus
+                            )
+                          }
+                        >
+                          <option value="PENDING">{preInscriptionStatusLabel('PENDING')}</option>
+                          <option value="CONTACTED">{preInscriptionStatusLabel('CONTACTED')}</option>
+                          <option value="ARCHIVED">{preInscriptionStatusLabel('ARCHIVED')}</option>
+                        </select>
+                      </p>
+                    </div>
+                    <dl className="admin-preinscription-detail-dl">
+                      {Object.keys(preInscriptionDetail.details || {})
+                        .sort()
+                        .map((key) => (
+                          <div key={key} className="admin-preinscription-detail-row">
+                            <dt>{PRE_INSCRIPTION_FIELD_LABELS[key] || key}</dt>
+                            <dd>{formatPreInscriptionFieldValue(preInscriptionDetail.details[key])}</dd>
+                          </div>
+                        ))}
+                    </dl>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
         )}
 

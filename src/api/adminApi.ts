@@ -27,6 +27,24 @@ export interface AdminUserSummary {
   createdAt: string;
 }
 
+export type PreInscriptionStatus = 'PENDING' | 'CONTACTED' | 'ARCHIVED';
+
+export interface PreInscriptionSummary {
+  id: number;
+  createdAt: string;
+  updatedAt: string;
+  status: PreInscriptionStatus;
+  nom: string;
+  prenom: string;
+  email: string;
+  telephone: string;
+  formationPreview: string | null;
+}
+
+export interface PreInscriptionDetail extends PreInscriptionSummary {
+  details: Record<string, unknown>;
+}
+
 export const adminApi = {
   /**
    * Récupérer les statistiques de la plateforme
@@ -104,5 +122,78 @@ export const adminApi = {
       }
       throw new ApiError('Erreur de connexion au serveur', 0);
     }
+  },
+
+  async listPreInscriptions(): Promise<PreInscriptionSummary[]> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new ApiError('Non authentifié', 401);
+    }
+    const response = await fetch(`${API_BASE_URL}/api/admin/pre-inscriptions`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new ApiError(
+        errorData.message || errorData.error || 'Erreur lors du chargement des pré-inscriptions',
+        response.status,
+        errorData.errors
+      );
+    }
+    return response.json();
+  },
+
+  async getPreInscription(id: number): Promise<PreInscriptionDetail> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new ApiError('Non authentifié', 401);
+    }
+    const response = await fetch(`${API_BASE_URL}/api/admin/pre-inscriptions/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new ApiError(
+        errorData.message || errorData.error || 'Dossier introuvable',
+        response.status,
+        errorData.errors
+      );
+    }
+    return response.json();
+  },
+
+  async updatePreInscriptionStatus(
+    id: number,
+    status: PreInscriptionStatus
+  ): Promise<PreInscriptionSummary> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new ApiError('Non authentifié', 401);
+    }
+    const response = await fetch(`${API_BASE_URL}/api/admin/pre-inscriptions/${id}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ status }),
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new ApiError(
+        errorData.message || errorData.error || 'Impossible de mettre à jour le statut',
+        response.status,
+        errorData.errors
+      );
+    }
+    return response.json();
   },
 };

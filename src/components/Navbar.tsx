@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Briefcase, LogOut, User, Home, PlusCircle, FileText, Calendar, Trophy, Menu, X } from 'lucide-react';
+import { Briefcase, LogOut, User, Home, PlusCircle, FileText, Calendar, Trophy, Menu, X, GraduationCap } from 'lucide-react';
 import { useState } from 'react';
 
 const Navbar = () => {
@@ -51,6 +51,10 @@ const Navbar = () => {
           <Link to="/events" className="navbar-link" onClick={closeMenu}>
             <Calendar size={18} />
             Événements
+          </Link>
+          <Link to="/etudes-canada" className="navbar-link" onClick={closeMenu}>
+            <GraduationCap size={18} />
+            Étudier au Canada
           </Link>
           
           {user ? (

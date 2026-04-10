@@ -6634,3 +6634,375 @@
     gap: 1rem;
   }
 }
+
+/* Study in Canada section */
+.study-canada-highlight {
+  padding: 4rem 0 1rem;
+}
+
+.study-canada-highlight-content {
+  background: linear-gradient(120deg, #f1f7ff 0%, #ffffff 100%);
+  border: 1px solid rgba(0, 66, 126, 0.12);
+  border-radius: 20px;
+  padding: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.study-canada-highlight-content h2 {
+  margin: 0.75rem 0;
+}
+
+.study-canada-highlight-content p {
+  color: var(--neutral-700);
+  max-width: 780px;
+}
+
+.study-canada-page {
+  background-color: var(--neutral-100);
+}
+
+.study-canada-hero {
+  padding: 4rem 0 2rem;
+  background: linear-gradient(180deg, #eaf4ff 0%, #f8fbff 100%);
+}
+
+.study-canada-hero h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin: 0.8rem 0;
+}
+
+.study-canada-hero p {
+  color: var(--neutral-700);
+  max-width: 760px;
+}
+
+.study-canada-body {
+  padding: 2rem 0 4rem;
+}
+
+.study-canada-main-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.study-procedure-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.study-procedure-card p:last-of-type {
+  margin-bottom: 0;
+}
+
+.study-procedure-lead {
+  margin-top: 1rem;
+  font-weight: 600;
+  color: var(--neutral-800);
+}
+
+.study-doc-list {
+  margin: 0.75rem 0 1rem;
+  padding-left: 1.25rem;
+  color: var(--neutral-700);
+  line-height: 1.6;
+}
+
+.study-doc-list li {
+  margin-bottom: 0.35rem;
+}
+
+.study-nb {
+  font-size: 0.9rem;
+  color: var(--neutral-600);
+  margin-bottom: 0 !important;
+}
+
+.study-subheading {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.05rem;
+  margin: 0 0 0.75rem;
+  color: var(--neutral-900);
+}
+
+.study-subheading-spaced {
+  margin-top: 1.25rem;
+}
+
+.study-fees-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.study-fees-table td {
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--neutral-300);
+  vertical-align: top;
+}
+
+.study-fees-table td:last-child {
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--primary-dark);
+  text-align: right;
+}
+
+.study-contact-card {
+  background: var(--primary-gradient);
+  color: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+}
+
+.study-contact-card .study-subheading {
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.study-contact-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.study-contact-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.study-contact-list a {
+  color: white;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.study-contact-list a:hover {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.study-contact-tagline {
+  margin-top: 1.25rem;
+  margin-bottom: 0;
+  font-weight: 600;
+  font-size: 0.95rem;
+  opacity: 0.95;
+}
+
+.study-fiche-card {
+  position: sticky;
+  top: 5.5rem;
+}
+
+.study-fiche-form {
+  gap: 1.25rem;
+}
+
+.study-fieldset {
+  border: 1px solid var(--neutral-300);
+  border-radius: 12px;
+  padding: 1rem 1rem 0.25rem;
+  margin: 0;
+}
+
+.study-fieldset legend {
+  padding: 0 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--primary-dark);
+}
+
+.study-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+}
+
+.study-field span {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--neutral-700);
+}
+
+.study-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.study-form select {
+  border: 1px solid var(--neutral-300);
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+  font-size: 0.95rem;
+  background: var(--white);
+}
+
+.study-form select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0, 66, 126, 0.08);
+}
+
+.study-submit-btn {
+  margin-top: 0.5rem;
+  width: 100%;
+  justify-content: center;
+}
+
+.study-card {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--neutral-300);
+}
+
+.study-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.study-card p {
+  margin-bottom: 1rem;
+  color: var(--neutral-700);
+}
+
+.study-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.study-form input,
+.study-form textarea {
+  border: 1px solid var(--neutral-300);
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+  font-size: 0.95rem;
+}
+
+.study-form input:focus,
+.study-form textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0, 66, 126, 0.08);
+}
+
+.study-success-message {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #0f8a51;
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .study-canada-main-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .study-fiche-card {
+    position: static;
+  }
+
+  .study-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .study-canada-highlight-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.study-form-error {
+  color: var(--danger);
+  margin-bottom: 1rem;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.admin-preinscription-modal {
+  max-width: 720px;
+  width: 92vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-preinscription-modal .modal-body {
+  overflow-y: auto;
+  max-height: min(70vh, 600px);
+}
+
+.preinscription-modal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--neutral-300);
+}
+
+.preinscription-modal-meta p {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.admin-preinscription-detail-dl {
+  margin: 0;
+}
+
+.admin-preinscription-detail-row {
+  margin-bottom: 0.75rem;
+}
+
+.admin-preinscription-detail-row dt {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--neutral-600);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.admin-preinscription-detail-row dd {
+  margin: 0.2rem 0 0;
+  color: var(--neutral-900);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.preinscription-preview-cell {
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preinscription-status-select {
+  min-height: 38px;
+  width: 100%;
+  max-width: 170px;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.9rem;
+}

@@ -16,6 +16,7 @@ import EmployerDashboard from './pages/EmployerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import EmployerRegister from './pages/EmployerRegister';
 import VerifyEmail from './pages/VerifyEmail';
+import StudyCanada from './pages/StudyCanada';
 import './App.css';
 
 function AppContent() {
@@ -45,6 +46,7 @@ function AppContent() {
           <Route path="/contests/:id" element={<ContestDetails />} />
           <Route path="/events" element={<Events />} />
           <Route path="/events/:id" element={<EventDetails />} />
+          <Route path="/etudes-canada" element={<StudyCanada />} />
           <Route path="/candidate/dashboard" element={<CandidateDashboard />} />
           <Route path="/employer/dashboard" element={<EmployerDashboard />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
