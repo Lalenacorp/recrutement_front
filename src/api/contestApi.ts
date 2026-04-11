@@ -1,5 +1,6 @@
 import type { ContestCreateRequest, ContestResponse } from '../types';
 import { ApiError } from './authApi';
+import { authFetch } from './authFetch';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
 
@@ -12,12 +13,9 @@ export async function createContest(request: ContestCreateRequest): Promise<Cont
     throw new ApiError('Non authentifié', 401);
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/admin/contests`, {
+  const response = await authFetch(`${API_BASE_URL}/api/admin/contests`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(request),
   });
 
@@ -38,11 +36,8 @@ export async function publishContest(contestId: number): Promise<ContestResponse
     throw new ApiError('Non authentifié', 401);
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/admin/contests/${contestId}/publish`, {
+  const response = await authFetch(`${API_BASE_URL}/api/admin/contests/${contestId}/publish`, {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
   });
 
   if (!response.ok) {
@@ -62,11 +57,8 @@ export async function archiveContest(contestId: number): Promise<ContestResponse
     throw new ApiError('Non authentifié', 401);
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/admin/contests/${contestId}/archive`, {
+  const response = await authFetch(`${API_BASE_URL}/api/admin/contests/${contestId}/archive`, {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
   });
 
   if (!response.ok) {
@@ -86,11 +78,8 @@ export async function listContestsAdmin(): Promise<ContestResponse[]> {
     throw new ApiError('Non authentifié', 401);
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/admin/contests`, {
+  const response = await authFetch(`${API_BASE_URL}/api/admin/contests`, {
     method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
   });
 
   if (!response.ok) {

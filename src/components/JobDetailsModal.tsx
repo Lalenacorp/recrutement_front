@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Briefcase, GraduationCap, Globe, DollarSign, FileText, Users } from 'lucide-react';
+import { X, Briefcase, GraduationCap, Globe, Coins, FileText, Users } from 'lucide-react';
 import type { JobDetails, EducationLevel, ExperienceLevel, JobContractType } from '../types';
 
 interface JobDetailsModalProps {
@@ -89,7 +89,7 @@ const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose }) => {
 
             <div className="detail-card">
               <div className="detail-icon">
-                <DollarSign size={20} />
+                <Coins size={20} aria-hidden />
               </div>
               <div>
                 <h4>Salaire</h4>

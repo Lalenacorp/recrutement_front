@@ -19,6 +19,7 @@ const ApplicationFormModal = ({ jobId, jobTitle, companyName, onClose, onSuccess
     lastName: '',
     email: '',
     phone: '',
+    coverLetter: '',
   });
   
   const [cvFile, setCvFile] = useState<File | null>(null);
@@ -26,7 +27,9 @@ const ApplicationFormModal = ({ jobId, jobTitle, companyName, onClose, onSuccess
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     setError(null);
@@ -74,6 +77,12 @@ const ApplicationFormModal = ({ jobId, jobTitle, companyName, onClose, onSuccess
 
     if (!validatePhone(formData.phone)) {
       setError('Numéro de téléphone invalide. Format attendu: +221701234567');
+      return;
+    }
+
+    const letter = formData.coverLetter?.trim() ?? '';
+    if (letter.length > 8000) {
+      setError('La lettre de motivation ne peut pas dépasser 8000 caractères');
       return;
     }
 
@@ -202,6 +211,23 @@ const ApplicationFormModal = ({ jobId, jobTitle, companyName, onClose, onSuccess
                 placeholder="+221701234567"
               />
               <small className="form-hint">Format international (ex: +221701234567)</small>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="coverLetter">Lettre de motivation (optionnel)</label>
+              <textarea
+                id="coverLetter"
+                name="coverLetter"
+                value={formData.coverLetter ?? ''}
+                onChange={handleInputChange}
+                className="form-control"
+                rows={8}
+                placeholder="Présentez-vous et expliquez votre intérêt pour ce poste…"
+                maxLength={8000}
+              />
+              <small className="form-hint">
+                {(formData.coverLetter ?? '').length} / 8000 caractères
+              </small>
             </div>
 
             <div className="form-group">

@@ -1,5 +1,6 @@
 import type { ApplicationRequest, ApplicationResponse } from '../types';
 import { ApiError } from './authApi';
+import { authFetch } from './authFetch';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
 
@@ -18,7 +19,10 @@ export const applicationApi = {
         firstName: request.firstName,
         lastName: request.lastName,
         email: request.email,
-        phone: request.phone
+        phone: request.phone,
+        ...(request.coverLetter?.trim()
+          ? { coverLetter: request.coverLetter.trim() }
+          : {}),
       };
       
       formData.append('payload', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
@@ -62,12 +66,9 @@ export const applicationApi = {
         throw new ApiError('Non authentifié', 401);
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/candidates/applications`, {
+      const response = await authFetch(`${API_BASE_URL}/api/candidates/applications`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
       });
 
       if (!response.ok) {

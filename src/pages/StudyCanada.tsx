@@ -1,13 +1,13 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import {
   CheckCircle,
+  ChevronLeft,
+  ChevronRight,
   FileText,
   GraduationCap,
-  Mail,
   MapPin,
   Phone,
-  Globe,
 } from 'lucide-react';
 import { submitPreInscription } from '../api/preInscriptionApi';
 import { ApiError } from '../api/authApi';
@@ -22,7 +22,7 @@ const DOSSIER_PIECES = [
   'Petite photo',
 ] as const;
 
-const FRAIS_CCA = [
+const FRAIS_ACCOMPAGNEMENT = [
   { label: "Frais d'ouverture de dossier", amount: '50.000 F CFA' },
   { label: 'Frais de procédure et de suivi', amount: '350.000 F CFA' },
   {
@@ -37,16 +37,74 @@ const FRAIS_GOUV = [
   { label: "Frais de visa à l'ambassade", amount: '122.000 F CFA' },
 ] as const;
 
+const FORM_STEP_LABELS = [
+  'Identité',
+  'Coordonnées',
+  'Famille & formation',
+  'Parcours scolaire',
+  'Antécédents Canada',
+] as const;
+
+const TOTAL_STEPS = FORM_STEP_LABELS.length;
+
 const StudyCanada = () => {
+  const formRef = useRef<HTMLFormElement>(null);
+  const [step, setStep] = useState(0);
   const [ficheSent, setFicheSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  const validateCurrentStep = (): boolean => {
+    const form = formRef.current;
+    if (!form) return false;
+    const panel = form.querySelector(`[data-step-panel="${step}"]`);
+    if (!panel) return false;
+    const fields = panel.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(
+      'input, select, textarea'
+    );
+    for (const field of fields) {
+      if (!field.checkValidity()) {
+        field.focus();
+        field.reportValidity();
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const goNext = () => {
+    if (!validateCurrentStep()) return;
+    setStep((s) => Math.min(s + 1, TOTAL_STEPS - 1));
+  };
+
+  const goPrev = () => {
+    setStep((s) => Math.max(s - 1, 0));
+  };
+
+  const validateEntireForm = (form: HTMLFormElement): boolean => {
+    const requiredFields = form.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(
+      'input[required], select[required], textarea[required]'
+    );
+    for (const field of requiredFields) {
+      if (!field.checkValidity()) {
+        const panel = field.closest('[data-step-panel]');
+        const idx = panel?.getAttribute('data-step-panel');
+        if (idx !== null && idx !== undefined) setStep(parseInt(idx, 10));
+        field.focus();
+        field.reportValidity();
+        return false;
+      }
+    }
+    return true;
+  };
+
   const handleFicheSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const form = event.currentTarget;
+    if (!validateEntireForm(form)) return;
+
     setSubmitError(null);
     setFicheSent(false);
-    const form = event.currentTarget;
     const fd = new FormData(form);
     const payload: Record<string, string> = {};
     fd.forEach((value, key) => {
@@ -56,6 +114,7 @@ const StudyCanada = () => {
     try {
       await submitPreInscription(payload);
       setFicheSent(true);
+      setStep(0);
       form.reset();
     } catch (err) {
       setSubmitError(err instanceof ApiError ? err.message : 'Impossible de contacter le serveur.');
@@ -68,11 +127,11 @@ const StudyCanada = () => {
     <div className="study-canada-page">
       <section className="study-canada-hero">
         <div className="container">
-          <span className="section-badge">CCA — Dakar</span>
+          <span className="section-badge">Études au Canada</span>
           <h1>Inscription et procédures — études au Canada</h1>
           <p>
-            Contenu conforme à la fiche CCA (Dakar) : ouverture de dossier pédagogique, pièces à
-            fournir, frais et formulaire de renseignements.
+            Ouverture de dossier pédagogique, pièces à fournir, frais et formulaire de
+            renseignements pour votre projet d&apos;études.
           </p>
         </div>
       </section>
@@ -107,10 +166,10 @@ const StudyCanada = () => {
             </article>
 
             <article className="study-card">
-              <h3 className="study-subheading">Frais CCA</h3>
+              <h3 className="study-subheading">Frais d&apos;accompagnement</h3>
               <table className="study-fees-table">
                 <tbody>
-                  {FRAIS_CCA.map((row) => (
+                  {FRAIS_ACCOMPAGNEMENT.map((row) => (
                     <tr key={row.label}>
                       <td>{row.label}</td>
                       <td>{row.amount}</td>
@@ -134,25 +193,19 @@ const StudyCanada = () => {
             </article>
 
             <aside className="study-contact-card">
-              <h3 className="study-subheading">CCA — Contact (Dakar)</h3>
+              <h3 className="study-subheading">Contact — Dakar</h3>
               <ul className="study-contact-list">
                 <li>
-                  <Mail size={18} aria-hidden />
-                  <a href="mailto:info@cca-groupe.com">info@cca-groupe.com</a>
+                  <Phone size={18} aria-hidden />
+                  <span>+221 77 641 78 41</span>
                 </li>
                 <li>
-                  <Globe size={18} aria-hidden />
-                  <a href="https://www.cca-groupe.com" target="_blank" rel="noopener noreferrer">
-                    www.cca-groupe.com
-                  </a>
+                  <Phone size={18} aria-hidden />
+                  <span>+1 (315) 222-8387</span>
                 </li>
                 <li>
                   <Phone size={18} aria-hidden />
                   <span>+221 77 295 55 33</span>
-                </li>
-                <li>
-                  <Phone size={18} aria-hidden />
-                  <span>+221 33 848 94 00</span>
                 </li>
                 <li>
                   <MapPin size={18} aria-hidden />
@@ -168,10 +221,10 @@ const StudyCanada = () => {
           <article className="study-card study-fiche-card">
             <div className="study-card-header">
               <FileText size={24} />
-              <h2>Fiche de renseignement (en ligne)</h2>
+              <h2>Fiche de renseignement</h2>
             </div>
             <p>
-              Reproduit les rubriques de la fiche papier CCA. Les pièces justificatives (copies,
+              Reprend les rubriques de la fiche papier officielle. Les pièces justificatives (copies,
               photo, etc.) sont à fournir lors de l&apos;ouverture de dossier sur place ou selon les
               consignes du centre.
             </p>
@@ -180,7 +233,13 @@ const StudyCanada = () => {
                 {submitError}
               </p>
             )}
-            <form onSubmit={handleFicheSubmit} className="study-form study-fiche-form">
+            <form
+              ref={formRef}
+              onSubmit={handleFicheSubmit}
+              className="study-form study-fiche-form study-multistep-form"
+              noValidate
+            >
+              <div className="study-step-panel" data-step-panel="0" hidden={step !== 0}>
               <label className="study-field">
                 <span>Date d&apos;inscription</span>
                 <input type="date" name="dateInscription" required />
@@ -227,7 +286,9 @@ const StudyCanada = () => {
                   <input type="text" name="numeroPasseport" required />
                 </label>
               </fieldset>
+              </div>
 
+              <div className="study-step-panel" data-step-panel="1" hidden={step !== 1}>
               <fieldset className="study-fieldset">
                 <legend>Coordonnées</legend>
                 <div className="study-form-row">
@@ -245,7 +306,9 @@ const StudyCanada = () => {
                   <input type="tel" name="telephoneUrgence" required />
                 </label>
               </fieldset>
+              </div>
 
+              <div className="study-step-panel" data-step-panel="2" hidden={step !== 2}>
               <fieldset className="study-fieldset">
                 <legend>Famille &amp; parcours</legend>
                 <label className="study-field">
@@ -267,15 +330,17 @@ const StudyCanada = () => {
                   </label>
                 </div>
                 <label className="study-field">
-                  <span>Où avez-vous connu CCA ?</span>
-                  <input type="text" name="connuCCA" required />
+                  <span>Comment nous avez-vous connus ?</span>
+                  <input type="text" name="commentConnu" required />
                 </label>
                 <label className="study-field">
                   <span>Formation souhaitée</span>
                   <textarea name="formationSouhaitee" rows={2} required />
                 </label>
               </fieldset>
+              </div>
 
+              <div className="study-step-panel" data-step-panel="3" hidden={step !== 3}>
               <fieldset className="study-fieldset">
                 <legend>Établissements fréquentés — Lycée</legend>
                 <label className="study-field">
@@ -319,7 +384,9 @@ const StudyCanada = () => {
                   <input type="text" name="universitePeriode" />
                 </label>
               </fieldset>
+              </div>
 
+              <div className="study-step-panel" data-step-panel="4" hidden={step !== 4}>
               <fieldset className="study-fieldset">
                 <legend>Antécédents Canada</legend>
                 <label className="study-field">
@@ -363,17 +430,69 @@ const StudyCanada = () => {
                   <textarea name="visaRefusRaison" rows={2} />
                 </label>
               </fieldset>
+              </div>
 
-              <button type="submit" className="btn btn-primary study-submit-btn" disabled={submitting}>
-                <FileText size={18} />
-                {submitting ? 'Envoi en cours…' : 'Envoyer ma fiche de renseignement'}
-              </button>
+              <div className="study-steps-footer">
+                <p className="study-steps-counter">
+                  Étape {step + 1} sur {TOTAL_STEPS} — {FORM_STEP_LABELS[step]}
+                </p>
+                <div className="study-steps-progress" role="list" aria-label="Progression du formulaire">
+                  {FORM_STEP_LABELS.map((label, i) =>
+                    i < step ? (
+                      <button
+                        key={label}
+                        type="button"
+                        role="listitem"
+                        className="study-step-dot done"
+                        onClick={() => setStep(i)}
+                        title={`Revenir à : ${label}`}
+                        aria-label={`Revenir à l'étape ${i + 1} : ${label}`}
+                      >
+                        {i + 1}
+                      </button>
+                    ) : (
+                      <span
+                        key={label}
+                        role="listitem"
+                        className={`study-step-dot ${i === step ? 'active' : ''} ${i > step ? 'future' : ''}`}
+                        aria-label={`Étape ${i + 1} : ${label}`}
+                        aria-current={i === step ? 'step' : undefined}
+                      >
+                        {i + 1}
+                      </span>
+                    )
+                  )}
+                </div>
+              </div>
+
+              <div className="study-steps-actions">
+                <button
+                  type="button"
+                  className="btn btn-outline study-step-btn-prev"
+                  onClick={goPrev}
+                  disabled={step === 0 || submitting}
+                >
+                  <ChevronLeft size={18} />
+                  Précédent
+                </button>
+                {step < TOTAL_STEPS - 1 ? (
+                  <button type="button" className="btn btn-primary study-step-btn-next" onClick={goNext}>
+                    Suivant
+                    <ChevronRight size={18} />
+                  </button>
+                ) : (
+                  <button type="submit" className="btn btn-primary study-submit-btn" disabled={submitting}>
+                    <FileText size={18} />
+                    {submitting ? 'Envoi en cours…' : 'Envoyer ma fiche de renseignement'}
+                  </button>
+                )}
+              </div>
             </form>
             {ficheSent && (
               <p className="study-success-message">
                 <CheckCircle size={18} />
-                Votre fiche a bien été enregistrée. Pensez à déposer les pièces du dossier auprès de
-                CCA selon leurs consignes.
+                Votre fiche a bien été enregistrée. Pensez à déposer les pièces du dossier sur place
+                selon les consignes qui vous seront communiquées.
               </p>
             )}
           </article>

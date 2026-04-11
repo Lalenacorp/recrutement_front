@@ -54,7 +54,8 @@ const PRE_INSCRIPTION_FIELD_LABELS: Record<string, string> = {
   dernierDiplome: 'Dernier diplôme obtenu',
   nomPere: 'Nom et prénom du père',
   nomMere: 'Nom et prénom de la mère',
-  connuCCA: 'Connaissance de CCA',
+  commentConnu: 'Comment nous avez-vous connus ?',
+  connuCCA: 'Comment nous avez-vous connus ?',
   formationSouhaitee: 'Formation souhaitée',
   lyceeNom: 'Lycée — nom',
   lyceeDiplome: 'Lycée — diplôme',
@@ -1160,7 +1161,7 @@ const AdminDashboard = () => {
           <div className="admin-dashboard-content">
             <div className="dashboard-header-section">
               <div>
-                <h1>Pré-inscriptions — études Canada (CCA)</h1>
+                <h1>Pré-inscriptions — études au Canada</h1>
                 <p className="text-muted">
                   Fiches envoyées depuis la page publique ; mettez à jour le statut après contact ou
                   clôture du dossier.

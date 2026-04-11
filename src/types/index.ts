@@ -161,6 +161,8 @@ export interface ApplicationRequest {
   lastName: string;
   email: string;
   phone: string; // Format E.164 (ex: +221701234567)
+  /** Lettre de motivation (optionnelle, max. 8000 caractères côté serveur) */
+  coverLetter?: string;
 }
 
 // Interface pour la réponse après soumission
@@ -172,6 +174,7 @@ export interface ApplicationResponse {
   status: ApplicationStatus;
   createdAt: string;
   cvUrl?: string;
+  coverLetter?: string;
 }
 
 // Types et interfaces pour les concours

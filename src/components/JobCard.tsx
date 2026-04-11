@@ -1,4 +1,4 @@
-import { Clock, DollarSign, Building2, Briefcase, GraduationCap } from 'lucide-react';
+import { Clock, Coins, Building2, Briefcase, GraduationCap } from 'lucide-react';
 import type { JobDetails, JobContractType, ExperienceLevel, EducationLevel } from '../types';
 import { useNavigate } from 'react-router-dom';
 
@@ -72,7 +72,7 @@ const JobCard = ({ job }: JobCardProps) => {
           <span>{getEducationLevelLabel(job.educationLevel)}</span>
         </div>
         <div className="detail">
-          <DollarSign size={16} />
+          <Coins size={16} aria-hidden />
           <span>{formatSalary(job.salaryAmount, job.salaryCurrency)}</span>
         </div>
       </div>

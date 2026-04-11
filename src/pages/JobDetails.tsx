@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import type { JobDetails as JobDetailsType, JobContractType, ExperienceLevel, EducationLevel } from '../types';
 import { jobApi } from '../api/jobApi';
 import ApplicationFormModal from '../components/ApplicationFormModal';
-import { Clock, DollarSign, Building2, CheckCircle, ArrowLeft, Briefcase, GraduationCap, Users, Globe } from 'lucide-react';
+import { Clock, Coins, Building2, CheckCircle, ArrowLeft, Briefcase, GraduationCap, Users, Globe } from 'lucide-react';
 
 const JobDetails = () => {
   const { id } = useParams();
@@ -158,7 +158,7 @@ const JobDetails = () => {
                 </div>
               </div>
               <div className="meta-item">
-                <DollarSign size={18} />
+                <Coins size={18} aria-hidden />
                 <div>
                   <strong>Salaire</strong>
                   <span>{formatSalary(job.salaryAmount, job.salaryCurrency)}</span>

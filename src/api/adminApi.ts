@@ -1,4 +1,5 @@
 import { ApiError } from './authApi';
+import { authFetch } from './authFetch';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
 
@@ -56,12 +57,9 @@ export const adminApi = {
         throw new ApiError('Non authentifié', 401);
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/admin/stats`, {
+      const response = await authFetch(`${API_BASE_URL}/api/admin/stats`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
       });
 
       if (!response.ok) {
@@ -98,12 +96,9 @@ export const adminApi = {
         params.set('type', type);
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/admin/users?${params.toString()}`, {
+      const response = await authFetch(`${API_BASE_URL}/api/admin/users?${params.toString()}`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
       });
 
       if (!response.ok) {
@@ -129,12 +124,9 @@ export const adminApi = {
     if (!token) {
       throw new ApiError('Non authentifié', 401);
     }
-    const response = await fetch(`${API_BASE_URL}/api/admin/pre-inscriptions`, {
+    const response = await authFetch(`${API_BASE_URL}/api/admin/pre-inscriptions`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { 'Content-Type': 'application/json' },
     });
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -152,12 +144,9 @@ export const adminApi = {
     if (!token) {
       throw new ApiError('Non authentifié', 401);
     }
-    const response = await fetch(`${API_BASE_URL}/api/admin/pre-inscriptions/${id}`, {
+    const response = await authFetch(`${API_BASE_URL}/api/admin/pre-inscriptions/${id}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { 'Content-Type': 'application/json' },
     });
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -178,12 +167,9 @@ export const adminApi = {
     if (!token) {
       throw new ApiError('Non authentifié', 401);
     }
-    const response = await fetch(`${API_BASE_URL}/api/admin/pre-inscriptions/${id}/status`, {
+    const response = await authFetch(`${API_BASE_URL}/api/admin/pre-inscriptions/${id}/status`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
     });
     if (!response.ok) {

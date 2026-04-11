@@ -1,5 +1,6 @@
 import type { EventCreateRequest, EventResponse } from '../types';
 import { ApiError } from './authApi';
+import { authFetch } from './authFetch';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
 
@@ -12,34 +13,14 @@ export async function createEvent(request: EventCreateRequest): Promise<EventRes
     throw new ApiError('Non authentifié', 401);
   }
 
-  // Debug: log token payload to help diagnose 401 responses
-  try {
-    const parts = token.split('.');
-    if (parts.length === 3) {
-      const payload = JSON.parse(atob(parts[1]));
-      console.debug('createEvent: token payload:', payload);
-    } else {
-      console.debug('createEvent: token present but not JWT-like');
-    }
-  } catch (e) {
-    console.debug('createEvent: failed to decode token for debug', e);
-  }
-
-  const response = await fetch(`${API_BASE_URL}/api/admin/events`, {
+  const response = await authFetch(`${API_BASE_URL}/api/admin/events`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(request),
   });
 
   if (!response.ok) {
     const errorText = await response.text().catch(() => '');
-    if (response.status === 401) {
-      console.warn('createEvent: backend returned 401 Unauthorized. Response body:', errorText);
-      throw new ApiError('Non autorisé — vérifiez le token ou les droits (ADMIN)', 401);
-    }
     throw new ApiError(errorText || 'Erreur lors de la création de l\'événement', response.status);
   }
 
@@ -53,12 +34,9 @@ export async function updateEvent(id: number, request: EventCreateRequest): Prom
       throw new ApiError('Non authentifié', 401);
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/admin/events/${id}`, {
+    const response = await authFetch(`${API_BASE_URL}/api/admin/events/${id}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(request),
     });
 
@@ -87,11 +65,8 @@ export async function deleteEvent(id: number): Promise<void> {
       throw new ApiError('Non authentifié', 401);
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/admin/events/${id}`, {
+    const response = await authFetch(`${API_BASE_URL}/api/admin/events/${id}`, {
       method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
     });
 
     if (!response.ok) {
@@ -119,11 +94,8 @@ export async function publishEvent(eventId: number): Promise<EventResponse> {
     throw new ApiError('Non authentifié', 401);
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/admin/events/${eventId}/publish`, {
+  const response = await authFetch(`${API_BASE_URL}/api/admin/events/${eventId}/publish`, {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
   });
 
   if (!response.ok) {
@@ -143,11 +115,8 @@ export async function archiveEvent(eventId: number): Promise<EventResponse> {
     throw new ApiError('Non authentifié', 401);
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/admin/events/${eventId}/archive`, {
+  const response = await authFetch(`${API_BASE_URL}/api/admin/events/${eventId}/archive`, {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
   });
 
   if (!response.ok) {
@@ -167,11 +136,8 @@ export async function listEventsAdmin(): Promise<EventResponse[]> {
     throw new ApiError('Non authentifié', 401);
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/admin/events`, {
+  const response = await authFetch(`${API_BASE_URL}/api/admin/events`, {
     method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
   });
 
   if (!response.ok) {

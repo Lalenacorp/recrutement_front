@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Briefcase, AlertCircle } from 'lucide-react';
+import { Briefcase, AlertCircle, Info } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -10,6 +10,9 @@ const Login = () => {
   const [error, setError] = useState<string | null>(null);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const sessionExpired =
+    Boolean((location.state as { sessionExpired?: boolean } | null)?.sessionExpired);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,6 +53,15 @@ const Login = () => {
           <p>Bienvenue sur JobConnect</p>
         </div>
 
+        {sessionExpired && (
+          <div className="alert alert-info" style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+            <Info size={20} />
+            <span>
+              Votre session a expiré ou n&apos;est plus valide. Connectez-vous à nouveau pour continuer.
+            </span>
+          </div>
+        )}
+
         {error && (
           <div className="alert alert-error">
             <AlertCircle size={20} />
@@ -71,7 +83,12 @@ const Login = () => {
           </div>
           
           <div className="form-group">
-            <label>Mot de passe</label>
+            <div className="login-password-row">
+              <label>Mot de passe</label>
+              <Link to="/forgot-password" className="auth-link-inline">
+                Mot de passe oublié ?
+              </Link>
+            </div>
             <input
               type="password"
               value={password}

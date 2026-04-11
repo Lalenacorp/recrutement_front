@@ -1,5 +1,6 @@
 import type { User } from '../types';
 import type { EmployerSignupRequest, EmployerResponse } from './types';
+import { authFetch } from './authFetch';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
 
@@ -17,6 +18,28 @@ export class ApiError extends Error {
     this.status = status;
     this.errors = errors;
   }
+}
+
+/** Extrait un message lisible depuis la réponse JSON Spring (ProblemDetail, validation, etc.). */
+export function errorMessageFromApiBody(data: Record<string, unknown>, fallback: string): string {
+  if (typeof data.message === 'string' && data.message.trim()) return data.message.trim();
+  if (typeof data.detail === 'string' && data.detail.trim()) return data.detail.trim();
+  if (typeof data.error === 'string' && data.error.trim() && data.error !== 'Bad Request') {
+    return data.error.trim();
+  }
+  const errors = data.errors;
+  if (Array.isArray(errors) && errors.length > 0) {
+    const first = errors[0] as Record<string, unknown>;
+    if (typeof first?.defaultMessage === 'string') return first.defaultMessage;
+  }
+  if (errors && typeof errors === 'object' && !Array.isArray(errors)) {
+    const rec = errors as Record<string, string[]>;
+    for (const key of Object.keys(rec)) {
+      const arr = rec[key];
+      if (Array.isArray(arr) && arr.length > 0 && typeof arr[0] === 'string') return arr[0];
+    }
+  }
+  return fallback;
 }
 
 interface LoginRequest {
@@ -73,13 +96,9 @@ export const authApi = {
     }
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/api/auth/password/change`, {
+      const response = await authFetch(`${API_BASE_URL}/api/auth/password/change`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           currentPassword,
           newPassword,
@@ -340,6 +359,56 @@ export const authApi = {
     }
   },
 
+  /**
+   * Demande de lien de réinitialisation. 404 si aucun compte pour cet e-mail.
+   */
+  async requestPasswordReset(email: string): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/api/auth/password/forgot`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const data = (await response.json().catch(() => ({}))) as Record<string, unknown>;
+    if (!response.ok) {
+      throw new ApiError(
+        errorMessageFromApiBody(
+          data,
+          response.status === 404
+            ? "Aucun compte n'est enregistré avec cette adresse e-mail."
+            : "Impossible d'envoyer la demande de réinitialisation."
+        ),
+        response.status,
+        data.errors as Record<string, string[]> | undefined
+      );
+    }
+    return { message: (data.message as string) ?? '' };
+  },
+
+  /**
+   * Définit un nouveau mot de passe à partir du jeton reçu par e-mail.
+   */
+  async resetPassword(token: string, newPassword: string, confirmNewPassword: string): Promise<void> {
+    if (newPassword !== confirmNewPassword) {
+      throw new ApiError('Les mots de passe ne correspondent pas.', 400);
+    }
+    if (newPassword.length < 8) {
+      throw new ApiError('Le mot de passe doit contenir au moins 8 caractères.', 400);
+    }
+    const response = await fetch(`${API_BASE_URL}/api/auth/password/reset`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, newPassword, confirmNewPassword }),
+    });
+    const data = (await response.json().catch(() => ({}))) as Record<string, unknown>;
+    if (!response.ok) {
+      throw new ApiError(
+        errorMessageFromApiBody(data, 'La réinitialisation du mot de passe a échoué.'),
+        response.status,
+        data.errors as Record<string, string[]> | undefined
+      );
+    }
+  },
+
   async logout(): Promise<void> {
     try {
       const token = localStorage.getItem('token');
@@ -349,13 +418,14 @@ export const authApi = {
         return;
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/auth/logout`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+      const response = await authFetch(
+        `${API_BASE_URL}/api/auth/logout`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
         },
-      });
+        { endSessionOn401: false }
+      );
 
       console.log('Logout response status:', response.status);
 

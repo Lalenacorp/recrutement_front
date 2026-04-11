@@ -1,9 +1,10 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import RegisterHub from './pages/RegisterHub';
 import Register from './pages/Register';
 import Jobs from './pages/Jobs';
 import JobDetails from './pages/JobDetails';
@@ -16,6 +17,8 @@ import EmployerDashboard from './pages/EmployerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import EmployerRegister from './pages/EmployerRegister';
 import VerifyEmail from './pages/VerifyEmail';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import StudyCanada from './pages/StudyCanada';
 import './App.css';
 
@@ -30,8 +33,12 @@ function AppContent() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/employer/register" element={<EmployerRegister />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/register" element={<RegisterHub />} />
+          <Route path="/register/candidat" element={<Register />} />
+          <Route path="/register/employeur" element={<EmployerRegister />} />
+          <Route path="/employer/register" element={<Navigate to="/register/employeur" replace />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/verify-email-employee" element={<VerifyEmail />} />
           {/* Permet de gérer les liens de vérification envoyés par l'API pour les employeurs :
@@ -59,11 +66,11 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
+    <Router>
+      <AuthProvider>
         <AppContent />
-      </Router>
-    </AuthProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 

@@ -143,6 +143,13 @@ const CandidateDashboard = () => {
                           </span>
                         </div>
                         
+                        {app.coverLetter && (
+                          <div className="application-cover-letter">
+                            <strong>Lettre de motivation</strong>
+                            <p className="cover-letter-preview">{app.coverLetter}</p>
+                          </div>
+                        )}
+
                         {app.cvUrl && (
                           <div className="application-cv">
                             <FileText size={16} />

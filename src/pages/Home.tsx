@@ -349,10 +349,10 @@ const Home = () => {
           <div className="study-canada-highlight-content">
             <div>
               <div className="section-badge">Nouveau service</div>
-              <h2>Études au Canada — procédure CCA (Dakar)</h2>
+              <h2>Études au Canada — pré-inscription</h2>
               <p>
-                Dossier pédagogique, frais, pièces à fournir et fiche de renseignement selon la
-                procédure CCA.
+                Dossier pédagogique, frais, pièces à fournir et fiche de renseignement pour votre
+                projet d&apos;études.
               </p>
             </div>
             <button className="btn btn-primary" onClick={() => navigate('/etudes-canada')}>

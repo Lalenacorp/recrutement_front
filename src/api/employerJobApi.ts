@@ -1,5 +1,6 @@
 import type { JobCreateRequest, JobResponse, JobDetails } from '../types';
 import { ApiError } from './authApi';
+import { authFetch } from './authFetch';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
 
@@ -14,12 +15,9 @@ export const employerJobApi = {
         throw new ApiError('Non authentifié', 401);
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/employers/jobs`, {
+      const response = await authFetch(`${API_BASE_URL}/api/employers/jobs`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(request),
       });
 
@@ -51,12 +49,9 @@ export const employerJobApi = {
         throw new ApiError('Non authentifié', 401);
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/employers/jobs/${jobId}/publish`, {
+      const response = await authFetch(`${API_BASE_URL}/api/employers/jobs/${jobId}/publish`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
       });
 
       if (!response.ok) {
@@ -87,11 +82,8 @@ export const employerJobApi = {
         throw new ApiError('Non authentifié', 401);
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/employers/jobs`, {
+      const response = await authFetch(`${API_BASE_URL}/api/employers/jobs`, {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
       });
 
       if (!response.ok) {
@@ -122,11 +114,8 @@ export const employerJobApi = {
         throw new ApiError('Non authentifié', 401);
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/employers/jobs/${jobId}`, {
+      const response = await authFetch(`${API_BASE_URL}/api/employers/jobs/${jobId}`, {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
       });
 
       if (!response.ok) {

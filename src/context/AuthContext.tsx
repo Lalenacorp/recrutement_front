@@ -1,7 +1,14 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { User } from '../types';
 import { authApi } from '../api/authApi';
+import {
+  SESSION_EXPIRED_EVENT,
+  endSessionDueToExpiredToken,
+  getJwtExpiresAtMs,
+  isAccessTokenExpired,
+} from '../api/authFetch';
 
 export interface RegisterData {
   civility: 'MR' | 'MS' | 'MX';
@@ -28,10 +35,60 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(() => {
     const savedUser = localStorage.getItem('user');
     return savedUser ? JSON.parse(savedUser) : null;
   });
+
+  useEffect(() => {
+    const onSessionExpired = () => {
+      setUser(null);
+      navigate('/login', { replace: true, state: { sessionExpired: true } });
+    };
+    window.addEventListener(SESSION_EXPIRED_EVENT, onSessionExpired);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, onSessionExpired);
+  }, [navigate]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const savedUser = localStorage.getItem('user');
+    if (savedUser && token && isAccessTokenExpired(token)) {
+      endSessionDueToExpiredToken();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const check = () => {
+      const t = localStorage.getItem('token');
+      if (t && isAccessTokenExpired(t)) {
+        endSessionDueToExpiredToken();
+      }
+    };
+    check();
+    const onVis = () => {
+      if (document.visibilityState === 'visible') check();
+    };
+    document.addEventListener('visibilitychange', onVis);
+    return () => document.removeEventListener('visibilitychange', onVis);
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    const t = localStorage.getItem('token');
+    if (!t) return;
+    const expMs = getJwtExpiresAtMs(t);
+    if (expMs == null) return;
+    const delay = Math.max(0, expMs - Date.now() + 500);
+    const id = window.setTimeout(() => {
+      const still = localStorage.getItem('token');
+      if (still && isAccessTokenExpired(still, 0)) {
+        endSessionDueToExpiredToken();
+      }
+    }, delay);
+    return () => window.clearTimeout(id);
+  }, [user]);
 
   const login = async (email: string, password: string) => {
     const response = await authApi.login({ email, password });
