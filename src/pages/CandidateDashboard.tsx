@@ -1,9 +1,46 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FileText, Briefcase, CheckCircle, Clock, X, Lock } from 'lucide-react';
-import type { ApplicationResponse, ApplicationStatus } from '../types';
+import { FileText, Briefcase, CheckCircle, Clock, X, Lock, Sparkles } from 'lucide-react';
+import type {
+  ApplicationResponse,
+  ApplicationStatus,
+  EducationLevel,
+  ExperienceLevel,
+  JobContractType,
+  JobMatchItem,
+} from '../types';
 import { applicationApi } from '../api/applicationApi';
+import { jobMatchingApi } from '../api/jobMatchingApi';
 import ChangePasswordForm from '../components/ChangePasswordForm';
+
+const EXPERIENCE_OPTIONS: { value: ExperienceLevel; label: string }[] = [
+  { value: 'ENTRY', label: 'Débutant (0–2 ans)' },
+  { value: 'MID', label: 'Confirmé (2–5 ans)' },
+  { value: 'SENIOR', label: 'Senior (5–10 ans)' },
+  { value: 'LEAD', label: 'Lead / 10+ ans' },
+];
+
+const EDUCATION_OPTIONS: { value: EducationLevel; label: string }[] = [
+  { value: 'NONE', label: 'Sans diplôme exigé' },
+  { value: 'HIGH_SCHOOL', label: 'Bac' },
+  { value: 'BACHELOR', label: 'Licence / Bachelor' },
+  { value: 'MASTER', label: 'Master' },
+  { value: 'DOCTORATE', label: 'Doctorat' },
+  { value: 'OTHER', label: 'Autre' },
+];
+
+const CONTRACT_OPTIONS: { value: JobContractType; label: string }[] = [
+  { value: 'FULL_TIME', label: 'Temps plein' },
+  { value: 'PART_TIME', label: 'Temps partiel' },
+  { value: 'CONTRACT', label: 'CDD / contrat' },
+  { value: 'INTERNSHIP', label: 'Stage' },
+  { value: 'TEMPORARY', label: 'Intérim / temporaire' },
+];
+
+function contractLabel(t: JobContractType): string {
+  return CONTRACT_OPTIONS.find((o) => o.value === t)?.label ?? t;
+}
 
 const CandidateDashboard = () => {
   const { user } = useAuth();
@@ -12,9 +49,54 @@ const CandidateDashboard = () => {
   const [error, setError] = useState<string | null>(null);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
 
+  const [matches, setMatches] = useState<JobMatchItem[]>([]);
+  const [matchLoading, setMatchLoading] = useState(true);
+  const [matchError, setMatchError] = useState<string | null>(null);
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileForm, setProfileForm] = useState<{
+    experience: ExperienceLevel | '';
+    education: EducationLevel | '';
+    contracts: Set<JobContractType>;
+    keywords: string;
+  }>({
+    experience: '',
+    education: '',
+    contracts: new Set(),
+    keywords: '',
+  });
+  const [profileComplete, setProfileComplete] = useState(false);
+
+  const loadMatching = useCallback(async () => {
+    try {
+      setMatchLoading(true);
+      setMatchError(null);
+      const [profile, list] = await Promise.all([
+        jobMatchingApi.getMatchingProfile(),
+        jobMatchingApi.getJobMatches(),
+      ]);
+      setProfileComplete(profile.profileComplete);
+      setProfileForm({
+        experience: profile.profileExperienceLevel ?? '',
+        education: profile.profileEducationLevel ?? '',
+        contracts: new Set(profile.preferredContractTypes ?? []),
+        keywords: profile.jobMatchKeywords ?? '',
+      });
+      setMatches(list);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erreur lors du chargement du matching';
+      setMatchError(msg);
+    } finally {
+      setMatchLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     loadApplications();
   }, []);
+
+  useEffect(() => {
+    loadMatching();
+  }, [loadMatching]);
 
   const loadApplications = async () => {
     try {
@@ -45,6 +127,37 @@ const CandidateDashboard = () => {
     }
   };
 
+  const saveMatchingProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setProfileSaving(true);
+      setMatchError(null);
+      const updated = await jobMatchingApi.updateMatchingProfile({
+        profileExperienceLevel: profileForm.experience || null,
+        profileEducationLevel: profileForm.education || null,
+        preferredContractTypes: [...profileForm.contracts],
+        jobMatchKeywords: profileForm.keywords.trim() || null,
+      });
+      setProfileComplete(updated.profileComplete);
+      const list = await jobMatchingApi.getJobMatches();
+      setMatches(list);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erreur lors de l’enregistrement';
+      setMatchError(msg);
+    } finally {
+      setProfileSaving(false);
+    }
+  };
+
+  const toggleContract = (value: JobContractType) => {
+    setProfileForm((prev) => {
+      const next = new Set(prev.contracts);
+      if (next.has(value)) next.delete(value);
+      else next.add(value);
+      return { ...prev, contracts: next };
+    });
+  };
+
   const getStatusText = (status: ApplicationStatus) => {
     switch (status) {
       case 'SUBMITTED':
@@ -71,6 +184,152 @@ const CandidateDashboard = () => {
       
       <div className="container">
         <div className="dashboard-content">
+          <div className="dashboard-section matching-section">
+                <div className="section-header">
+                  <h2>
+                    <Sparkles size={28} className="matching-section-icon" aria-hidden />
+                    Offres pour vous
+                  </h2>
+                </div>
+                {!profileComplete && (
+                  <p className="matching-hint">
+                    Renseignez au minimum votre expérience et votre formation ci-dessous pour des scores de
+                    correspondance plus fiables.
+                  </p>
+                )}
+
+                <form className="matching-profile-form" onSubmit={saveMatchingProfile}>
+                  <h3 className="matching-subtitle">Profil de matching</h3>
+                  <div className="matching-form-grid">
+                    <label className="matching-field">
+                      <span>Niveau d&apos;expérience</span>
+                      <select
+                        value={profileForm.experience}
+                        onChange={(ev) =>
+                          setProfileForm((p) => ({
+                            ...p,
+                            experience: (ev.target.value || '') as ExperienceLevel | '',
+                          }))
+                        }
+                      >
+                        <option value="">— Non renseigné —</option>
+                        {EXPERIENCE_OPTIONS.map((o) => (
+                          <option key={o.value} value={o.value}>
+                            {o.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="matching-field">
+                      <span>Formation</span>
+                      <select
+                        value={profileForm.education}
+                        onChange={(ev) =>
+                          setProfileForm((p) => ({
+                            ...p,
+                            education: (ev.target.value || '') as EducationLevel | '',
+                          }))
+                        }
+                      >
+                        <option value="">— Non renseigné —</option>
+                        {EDUCATION_OPTIONS.map((o) => (
+                          <option key={o.value} value={o.value}>
+                            {o.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+                  <fieldset className="matching-contracts">
+                    <legend>Types de contrat recherchés</legend>
+                    <div className="matching-contract-chips">
+                      {CONTRACT_OPTIONS.map((o) => (
+                        <label key={o.value} className="matching-chip">
+                          <input
+                            type="checkbox"
+                            checked={profileForm.contracts.has(o.value)}
+                            onChange={() => toggleContract(o.value)}
+                          />
+                          <span>{o.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                  <label className="matching-field matching-keywords">
+                    <span>Mots-clés (compétences, secteurs…)</span>
+                    <textarea
+                      rows={3}
+                      maxLength={500}
+                      placeholder="ex. Java, commercial, logistique"
+                      value={profileForm.keywords}
+                      onChange={(ev) => setProfileForm((p) => ({ ...p, keywords: ev.target.value }))}
+                    />
+                  </label>
+                  <div className="matching-form-actions">
+                    <button type="submit" className="btn btn-primary" disabled={profileSaving}>
+                      {profileSaving ? 'Enregistrement…' : 'Enregistrer et actualiser les offres'}
+                    </button>
+                  </div>
+                </form>
+
+                {matchError && (
+                  <div className="error-message matching-error">
+                    <p>{matchError}</p>
+                    <button type="button" className="btn btn-primary" onClick={() => loadMatching()}>
+                      Réessayer
+                    </button>
+                  </div>
+                )}
+
+                {matchLoading && !matchError ? (
+                  <div className="loading-message matching-loading">
+                    <div className="spinner" />
+                    <p>Chargement des recommandations…</p>
+                  </div>
+                ) : !matchError && matches.length === 0 ? (
+                  <div className="empty-state matching-empty">
+                    <Briefcase size={48} />
+                    <p>Aucune offre à vous proposer pour le moment (ou vous avez déjà postulé partout).</p>
+                    <Link to="/jobs" className="btn btn-primary">
+                      Voir toutes les offres
+                    </Link>
+                  </div>
+                ) : !matchError ? (
+                  <ul className="job-match-list">
+                    {matches.map((m) => (
+                      <li key={m.jobId} className="job-match-card">
+                        <div className="job-match-card-top">
+                          <div>
+                            <h3>{m.title}</h3>
+                            <p className="job-match-company">{m.companyName}</p>
+                          </div>
+                          <span className="match-score-pill" title="Correspondance estimée">
+                            {m.matchPercent}%
+                          </span>
+                        </div>
+                        <p className="job-match-meta">
+                          {contractLabel(m.contractType)} · {m.salaryAmount.toLocaleString('fr-FR')}{' '}
+                          {m.salaryCurrency}
+                          {m.publishedAt
+                            ? ` · Publiée le ${new Date(m.publishedAt).toLocaleDateString('fr-FR')}`
+                            : ''}
+                        </p>
+                        {m.matchHighlights.length > 0 && (
+                          <ul className="match-highlights">
+                            {m.matchHighlights.map((line, i) => (
+                              <li key={`${m.jobId}-${i}`}>{line}</li>
+                            ))}
+                          </ul>
+                        )}
+                        <Link to={`/jobs/${m.jobId}`} className="btn btn-outline job-match-cta">
+                          Voir l&apos;offre
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+          </div>
+
           {loading ? (
             <div className="loading-message">
               <div className="spinner"></div>
@@ -93,24 +352,24 @@ const CandidateDashboard = () => {
                     <p>Candidatures</p>
                   </div>
                 </div>
-                
+
                 <div className="stat-card">
                   <Clock size={32} />
                   <div>
-                    <h3>{applications.filter(a => a.status === 'SUBMITTED').length}</h3>
+                    <h3>{applications.filter((a) => a.status === 'SUBMITTED').length}</h3>
                     <p>En attente</p>
                   </div>
                 </div>
-                
+
                 <div className="stat-card">
                   <CheckCircle size={32} />
                   <div>
-                    <h3>{applications.filter(a => a.status === 'ACCEPTED').length}</h3>
+                    <h3>{applications.filter((a) => a.status === 'ACCEPTED').length}</h3>
                     <p>Acceptées</p>
                   </div>
                 </div>
               </div>
-              
+
               <div className="dashboard-section">
                 <h2>Mes candidatures</h2>
                 
@@ -165,7 +424,7 @@ const CandidateDashboard = () => {
               </div>
             </>
           )}
-          
+
           <div className="dashboard-section">
             <h2>Profil</h2>
             <div className="profile-card">

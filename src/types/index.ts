@@ -177,6 +177,28 @@ export interface ApplicationResponse {
   coverLetter?: string;
 }
 
+/** Profil optionnel utilisé pour scorer les offres (candidat connecté) */
+export interface CandidateMatchingProfile {
+  profileExperienceLevel: ExperienceLevel | null;
+  profileEducationLevel: EducationLevel | null;
+  preferredContractTypes: JobContractType[];
+  jobMatchKeywords: string | null;
+  profileComplete: boolean;
+}
+
+/** Offre recommandée avec score de correspondance */
+export interface JobMatchItem {
+  jobId: number;
+  title: string;
+  companyName: string;
+  matchPercent: number;
+  matchHighlights: string[];
+  contractType: JobContractType;
+  salaryAmount: number;
+  salaryCurrency: string;
+  publishedAt: string;
+}
+
 // Types et interfaces pour les concours
 export type ContestStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
 
