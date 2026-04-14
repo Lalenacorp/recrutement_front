@@ -5,6 +5,7 @@ import { FileText, Briefcase, CheckCircle, Clock, X, Lock, Sparkles } from 'luci
 import type {
   ApplicationResponse,
   ApplicationStatus,
+  CvOptimizationResponse,
   EducationLevel,
   ExperienceLevel,
   JobContractType,
@@ -65,6 +66,11 @@ const CandidateDashboard = () => {
     keywords: '',
   });
   const [profileComplete, setProfileComplete] = useState(false);
+  const [cvOptimizerOpenForJobId, setCvOptimizerOpenForJobId] = useState<number | null>(null);
+  const [cvSourceText, setCvSourceText] = useState('');
+  const [cvOptimizing, setCvOptimizing] = useState(false);
+  const [cvOptimizeError, setCvOptimizeError] = useState<string | null>(null);
+  const [cvOptimizeResult, setCvOptimizeResult] = useState<CvOptimizationResponse | null>(null);
 
   const loadMatching = useCallback(async () => {
     try {
@@ -156,6 +162,37 @@ const CandidateDashboard = () => {
       else next.add(value);
       return { ...prev, contracts: next };
     });
+  };
+
+  const openCvOptimizer = (jobId: number) => {
+    setCvOptimizerOpenForJobId(jobId);
+    setCvOptimizeError(null);
+    setCvOptimizeResult(null);
+  };
+
+  const closeCvOptimizer = () => {
+    setCvOptimizerOpenForJobId(null);
+    setCvOptimizing(false);
+    setCvOptimizeError(null);
+    setCvOptimizeResult(null);
+  };
+
+  const runCvOptimization = async (jobId: number) => {
+    if (!cvSourceText.trim()) {
+      setCvOptimizeError('Collez le texte actuel de votre CV avant de lancer l’optimisation.');
+      return;
+    }
+    try {
+      setCvOptimizing(true);
+      setCvOptimizeError(null);
+      const result = await jobMatchingApi.optimizeCvForJob(jobId, cvSourceText);
+      setCvOptimizeResult(result);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erreur pendant l’optimisation IA';
+      setCvOptimizeError(msg);
+    } finally {
+      setCvOptimizing(false);
+    }
   };
 
   const getStatusText = (status: ApplicationStatus) => {
@@ -324,6 +361,65 @@ const CandidateDashboard = () => {
                         <Link to={`/jobs/${m.jobId}`} className="btn btn-outline job-match-cta">
                           Voir l&apos;offre
                         </Link>
+                        <button
+                          type="button"
+                          className="btn btn-primary job-match-cta"
+                          onClick={() => openCvOptimizer(m.jobId)}
+                        >
+                          Optimiser mon CV avec IA
+                        </button>
+
+                        {cvOptimizerOpenForJobId === m.jobId && (
+                          <div className="cv-optimizer-panel">
+                            <h4>Optimisation IA pour {m.title}</h4>
+                            <p className="cv-optimizer-help">
+                              Collez votre CV actuel en texte. L&apos;outil propose une version optimisée pour
+                              cette offre.
+                            </p>
+                            <label className="matching-field">
+                              <span>Mon CV actuel (texte)</span>
+                              <textarea
+                                rows={10}
+                                maxLength={20000}
+                                value={cvSourceText}
+                                onChange={(ev) => setCvSourceText(ev.target.value)}
+                                placeholder="Copiez-collez ici le contenu de votre CV"
+                              />
+                            </label>
+                            <div className="cv-optimizer-actions">
+                              <button
+                                type="button"
+                                className="btn btn-primary"
+                                disabled={cvOptimizing}
+                                onClick={() => runCvOptimization(m.jobId)}
+                              >
+                                {cvOptimizing ? 'Optimisation…' : 'Lancer l’optimisation'}
+                              </button>
+                              <button type="button" className="btn btn-outline" onClick={closeCvOptimizer}>
+                                Fermer
+                              </button>
+                            </div>
+
+                            {cvOptimizeError && <p className="cv-optimizer-error">{cvOptimizeError}</p>}
+
+                            {cvOptimizeResult && (
+                              <div className="cv-optimizer-result">
+                                <label className="matching-field">
+                                  <span>CV optimisé</span>
+                                  <textarea readOnly rows={12} value={cvOptimizeResult.optimizedCvText} />
+                                </label>
+                                {cvOptimizeResult.keyImprovements.length > 0 && (
+                                  <ul className="match-highlights">
+                                    {cvOptimizeResult.keyImprovements.map((line, idx) => (
+                                      <li key={`${cvOptimizeResult.jobId}-improvement-${idx}`}>{line}</li>
+                                    ))}
+                                  </ul>
+                                )}
+                                <p className="cv-optimizer-disclaimer">{cvOptimizeResult.disclaimer}</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </li>
                     ))}
                   </ul>

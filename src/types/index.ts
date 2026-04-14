@@ -199,6 +199,14 @@ export interface JobMatchItem {
   publishedAt: string;
 }
 
+export interface CvOptimizationResponse {
+  jobId: number;
+  jobTitle: string;
+  optimizedCvText: string;
+  keyImprovements: string[];
+  disclaimer: string;
+}
+
 // Types et interfaces pour les concours
 export type ContestStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
 

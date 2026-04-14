@@ -1,5 +1,6 @@
 import type {
   CandidateMatchingProfile,
+  CvOptimizationResponse,
   EducationLevel,
   ExperienceLevel,
   JobContractType,
@@ -67,5 +68,17 @@ export const jobMatchingApi = {
       headers: { Accept: 'application/json' },
     });
     return readJson<JobMatchItem[]>(response);
+  },
+
+  async optimizeCvForJob(jobId: number, currentCvText: string): Promise<CvOptimizationResponse> {
+    const response = await authFetch(`${API_BASE_URL}/api/candidates/cv-optimizer/optimize`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({
+        jobId,
+        currentCvText: currentCvText.trim(),
+      }),
+    });
+    return readJson<CvOptimizationResponse>(response);
   },
 };

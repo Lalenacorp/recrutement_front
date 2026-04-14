@@ -5687,6 +5687,49 @@
 
 .job-match-cta {
   display: inline-block;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.cv-optimizer-panel {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--neutral-300);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.cv-optimizer-panel h4 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: var(--neutral-900);
+}
+
+.cv-optimizer-help {
+  margin: 0 0 0.75rem;
+  color: var(--neutral-600);
+  font-size: 0.9rem;
+}
+
+.cv-optimizer-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.cv-optimizer-error {
+  margin-top: 0.75rem;
+  color: var(--danger, #dc2626);
+}
+
+.cv-optimizer-result {
+  margin-top: 1rem;
+}
+
+.cv-optimizer-disclaimer {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: var(--neutral-600);
 }
 
 .application-card {
