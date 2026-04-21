@@ -7795,7 +7795,8 @@
   color: var(--neutral-600);
   font-weight: 700;
   font-size: 0.85rem;
-  cursor: pointer;
+  cursor: default;
+  user-select: none;
   transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;

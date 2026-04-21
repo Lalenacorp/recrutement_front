@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import {
   CheckCircle,
@@ -47,12 +47,90 @@ const FORM_STEP_LABELS = [
 
 const TOTAL_STEPS = FORM_STEP_LABELS.length;
 
+const DRAFT_KEY = 'studyCanadaPreInscriptionDraft';
+
+type DraftPayload = { step: number; data: Record<string, string> };
+
+function applyDraftValueToNamedControl(
+  el: Element | RadioNodeList | null,
+  value: string
+): void {
+  if (!el) return;
+  if (el instanceof RadioNodeList) {
+    for (let i = 0; i < el.length; i++) {
+      const node = el.item(i);
+      if (node instanceof HTMLInputElement && node.type === 'radio' && node.value === value) {
+        node.checked = true;
+      }
+    }
+    return;
+  }
+  if (el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement) {
+    el.value = value;
+  }
+}
+
 const StudyCanada = () => {
   const formRef = useRef<HTMLFormElement>(null);
+  const draftSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [step, setStep] = useState(0);
   const [ficheSent, setFicheSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const snapshotDraft = useCallback((nextStep: number) => {
+    const form = formRef.current;
+    if (!form) return;
+    const fd = new FormData(form);
+    const data: Record<string, string> = {};
+    fd.forEach((value, key) => {
+      data[key] = String(value);
+    });
+    try {
+      sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ step: nextStep, data } satisfies DraftPayload));
+    } catch {
+      /* quota / private mode */
+    }
+  }, []);
+
+  const scheduleDraftSave = useCallback(() => {
+    if (draftSaveTimer.current) clearTimeout(draftSaveTimer.current);
+    draftSaveTimer.current = setTimeout(() => {
+      draftSaveTimer.current = null;
+      snapshotDraft(step);
+    }, 400);
+  }, [snapshotDraft, step]);
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(DRAFT_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as DraftPayload;
+      if (
+        typeof parsed.step !== 'number' ||
+        parsed.step < 0 ||
+        parsed.step >= TOTAL_STEPS ||
+        !parsed.data ||
+        typeof parsed.data !== 'object'
+      ) {
+        return;
+      }
+      setStep(parsed.step);
+      queueMicrotask(() => {
+        const form = formRef.current;
+        if (!form) return;
+        for (const [name, value] of Object.entries(parsed.data)) {
+          applyDraftValueToNamedControl(form.elements.namedItem(name), value);
+        }
+      });
+    } catch {
+      /* ignore invalid draft */
+    }
+  }, []);
+
+  useEffect(() => () => {
+    if (draftSaveTimer.current) clearTimeout(draftSaveTimer.current);
+  }, []);
 
   const validateCurrentStep = (): boolean => {
     const form = formRef.current;
@@ -74,11 +152,19 @@ const StudyCanada = () => {
 
   const goNext = () => {
     if (!validateCurrentStep()) return;
-    setStep((s) => Math.min(s + 1, TOTAL_STEPS - 1));
+    setStep((s) => {
+      const next = Math.min(s + 1, TOTAL_STEPS - 1);
+      queueMicrotask(() => snapshotDraft(next));
+      return next;
+    });
   };
 
   const goPrev = () => {
-    setStep((s) => Math.max(s - 1, 0));
+    setStep((s) => {
+      const next = Math.max(s - 1, 0);
+      queueMicrotask(() => snapshotDraft(next));
+      return next;
+    });
   };
 
   const validateEntireForm = (form: HTMLFormElement): boolean => {
@@ -116,6 +202,11 @@ const StudyCanada = () => {
       setFicheSent(true);
       setStep(0);
       form.reset();
+      try {
+        sessionStorage.removeItem(DRAFT_KEY);
+      } catch {
+        /* ignore */
+      }
     } catch (err) {
       setSubmitError(err instanceof ApiError ? err.message : 'Impossible de contacter le serveur.');
     } finally {
@@ -236,6 +327,7 @@ const StudyCanada = () => {
             <form
               ref={formRef}
               onSubmit={handleFicheSubmit}
+              onInput={scheduleDraftSave}
               className="study-form study-fiche-form study-multistep-form"
               noValidate
             >
@@ -437,31 +529,17 @@ const StudyCanada = () => {
                   Étape {step + 1} sur {TOTAL_STEPS} — {FORM_STEP_LABELS[step]}
                 </p>
                 <div className="study-steps-progress" role="list" aria-label="Progression du formulaire">
-                  {FORM_STEP_LABELS.map((label, i) =>
-                    i < step ? (
-                      <button
-                        key={label}
-                        type="button"
-                        role="listitem"
-                        className="study-step-dot done"
-                        onClick={() => setStep(i)}
-                        title={`Revenir à : ${label}`}
-                        aria-label={`Revenir à l'étape ${i + 1} : ${label}`}
-                      >
-                        {i + 1}
-                      </button>
-                    ) : (
-                      <span
-                        key={label}
-                        role="listitem"
-                        className={`study-step-dot ${i === step ? 'active' : ''} ${i > step ? 'future' : ''}`}
-                        aria-label={`Étape ${i + 1} : ${label}`}
-                        aria-current={i === step ? 'step' : undefined}
-                      >
-                        {i + 1}
-                      </span>
-                    )
-                  )}
+                  {FORM_STEP_LABELS.map((label, i) => (
+                    <span
+                      key={label}
+                      role="listitem"
+                      className={`study-step-dot ${i < step ? 'done' : ''} ${i === step ? 'active' : ''} ${i > step ? 'future' : ''}`}
+                      aria-label={`Étape ${i + 1} : ${label}`}
+                      aria-current={i === step ? 'step' : undefined}
+                    >
+                      {i + 1}
+                    </span>
+                  ))}
                 </div>
               </div>
 

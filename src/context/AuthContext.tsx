@@ -5,6 +5,7 @@ import type { User } from '../types';
 import { authApi } from '../api/authApi';
 import {
   SESSION_EXPIRED_EVENT,
+  clearAuthStorage,
   endSessionDueToExpiredToken,
   getJwtExpiresAtMs,
   isAccessTokenExpired,
@@ -36,10 +37,34 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
   const [user, setUser] = useState<User | null>(() => {
     const savedUser = localStorage.getItem('user');
     return savedUser ? JSON.parse(savedUser) : null;
   });
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const savedApiBase = localStorage.getItem('authApiBase');
+
+    // Prevent stale sessions when switching API target (prod <-> local).
+    if (savedApiBase && savedApiBase !== apiBaseUrl) {
+      clearAuthStorage();
+      setUser(null);
+      localStorage.setItem('authApiBase', apiBaseUrl);
+      return;
+    }
+
+    if (!savedApiBase) {
+      localStorage.setItem('authApiBase', apiBaseUrl);
+    }
+
+    // If user is restored but token is missing, reset auth state.
+    if (!token && localStorage.getItem('user')) {
+      clearAuthStorage();
+      setUser(null);
+    }
+  }, [apiBaseUrl]);
 
   useEffect(() => {
     const onSessionExpired = () => {

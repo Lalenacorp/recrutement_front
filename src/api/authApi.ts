@@ -138,23 +138,36 @@ export const authApi = {
       console.log('Login response status:', response.status);
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.log('Login error data:', errorData);
+        const errorText = await response.text().catch(() => '');
+        let errorData: Record<string, unknown> = {};
+        try {
+          errorData = errorText ? (JSON.parse(errorText) as Record<string, unknown>) : {};
+        } catch {
+          errorData = {};
+        }
+        console.log('Login error data:', errorData || errorText);
+        const fallbackMessage = response.status === 401
+          ? 'Email ou mot de passe incorrect'
+          : 'Erreur lors de la connexion';
+        const messageFromBody = errorMessageFromApiBody(errorData, fallbackMessage);
+        const finalMessage =
+          messageFromBody !== fallbackMessage
+            ? messageFromBody
+            : (errorText && errorText.trim().length > 0 ? errorText : fallbackMessage);
         
         // Gestion spécifique pour 401
         if (response.status === 401) {
-          const errorMessage = errorData.message || errorData.error || 'Email ou mot de passe incorrect';
           throw new ApiError(
-            errorMessage,
+            finalMessage,
             response.status,
-            errorData.errors
+            errorData.errors as Record<string, string[]> | undefined
           );
         }
         
         throw new ApiError(
-          errorData.message || errorData.error || 'Erreur lors de la connexion',
+          finalMessage,
           response.status,
-          errorData.errors
+          errorData.errors as Record<string, string[]> | undefined
         );
       }
 
