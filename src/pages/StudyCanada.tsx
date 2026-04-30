@@ -218,8 +218,8 @@ const StudyCanada = () => {
     <div className="study-canada-page">
       <section className="study-canada-hero">
         <div className="container">
-          <span className="section-badge">Études au Canada</span>
-          <h1>Inscription et procédures — études au Canada</h1>
+          <span className="section-badge">Études à l'étranger</span>
+          <h1>Inscription et procédures — études à l'étranger</h1>
           <p>
             Ouverture de dossier pédagogique, pièces à fournir, frais et formulaire de
             renseignements pour votre projet d&apos;études.
