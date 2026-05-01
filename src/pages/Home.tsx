@@ -59,7 +59,7 @@ const Home = () => {
               </div>
               <div className="stat-badge">
                 <Star size={14} fill="currentColor" />
-                <span><strong>5,000+</strong> Entreprises</span>
+                <span><strong>50+</strong> Entreprises</span>
               </div>
               <div className="stat-badge">
                 <Star size={14} fill="currentColor" />
@@ -84,7 +84,7 @@ const Home = () => {
                   </div>
                   <div className="card-content">
                     <div className="card-title">Developer</div>
-                    <div className="card-company">Tech Corp</div>
+                    <div className="card-company">Helixsen</div>
                   </div>
                   <div className="card-badge">Nouveau</div>
                 </div>
@@ -293,28 +293,28 @@ const Home = () => {
           <div className="section-header">
             <span className="section-badge">Nos Partenaires</span>
             <h2>Ils recrutent avec nous</h2>
-            <p className="section-subtitle">Plus de 5000 entreprises font confiance à JobConnect</p>
+            <p className="section-subtitle">Plus de 50 entreprises font confiance à JobConnect</p>
           </div>
           <div className="companies-logos">
             <div className="company-badge">
               <Building2 size={28} />
-              <span>Tech Corp</span>
+              <span>Helixsen</span>
             </div>
             <div className="company-badge">
               <Building2 size={28} />
-              <span>Innovation Labs</span>
+              <span>LalenaCorp</span>
             </div>
             <div className="company-badge">
               <Building2 size={28} />
-              <span>Digital Solutions</span>
+              <span>WellCompTax</span>
             </div>
             <div className="company-badge">
               <Building2 size={28} />
-              <span>Creative Agency</span>
+              <span>Jayco</span>
             </div>
             <div className="company-badge">
               <Building2 size={28} />
-              <span>StartUp Hub</span>
+              <span>FBA Consulting</span>
             </div>
           </div>
         </div>
@@ -374,7 +374,7 @@ const Home = () => {
               <p>Offres d'emploi actives</p>
             </div>
             <div className="stat-item">
-              <h3>5,000+</h3>
+              <h3>50+</h3>
               <div className="stat-icon">
                 <Building2 size={32} />
               </div>
