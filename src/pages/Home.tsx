@@ -64,7 +64,7 @@ const Home = () => {
               </div>
               <div className="stat-badge">
                 <Star size={14} fill="currentColor" />
-                <span><strong>5,000+</strong> Entreprises</span>
+                <span><strong>50+</strong> Entreprises</span>
               </div>
               <div className="stat-badge">
                 <Star size={14} fill="currentColor" />
@@ -89,7 +89,7 @@ const Home = () => {
                   </div>
                   <div className="card-content">
                     <div className="card-title">Developer</div>
-                    <div className="card-company">Tech Corp</div>
+                    <div className="card-company">Helixsen</div>
                   </div>
                   <div className="card-badge">Nouveau</div>
                 </div>
@@ -372,7 +372,7 @@ const Home = () => {
               <p>Offres d'emploi actives</p>
             </div>
             <div className="stat-item">
-              <h3>5,000+</h3>
+              <h3>50+</h3>
               <div className="stat-icon">
                 <Building2 size={32} />
               </div>
