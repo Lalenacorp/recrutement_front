@@ -171,6 +171,9 @@ export interface ApplicationResponse {
   jobId: number;
   jobTitle: string;
   companyName: string;
+  candidateFirstName?: string;
+  candidateLastName?: string;
+  candidateEmail?: string;
   status: ApplicationStatus;
   createdAt: string;
   cvUrl?: string;

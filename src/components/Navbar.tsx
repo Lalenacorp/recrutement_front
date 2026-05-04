@@ -54,7 +54,7 @@ const Navbar = () => {
           </Link>
           <Link to="/etudes-canada" className="navbar-link" onClick={closeMenu}>
             <GraduationCap size={18} />
-            Étudier au Canada
+            Étudier à l'étranger
           </Link>
           
           {user ? (

@@ -1,8 +1,13 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Users, Briefcase, TrendingUp, Award, ArrowRight, Sparkles, Star, CheckCircle, Shield, Zap, Target, FileCheck, Building2, GraduationCap } from 'lucide-react';
+import PartnerCompanyModal from '../components/PartnerCompanyModal';
+import { PARTNER_COMPANIES } from '../data/partnerCompanies';
+import type { PartnerCompany } from '../data/partnerCompanies';
 
 const Home = () => {
   const navigate = useNavigate();
+  const [partnerDetail, setPartnerDetail] = useState<PartnerCompany | null>(null);
 
   return (
     <div className="home">
@@ -293,32 +298,25 @@ const Home = () => {
           <div className="section-header">
             <span className="section-badge">Nos Partenaires</span>
             <h2>Ils recrutent avec nous</h2>
-            <p className="section-subtitle">Plus de 5000 entreprises font confiance à JobConnect</p>
+            <p className="section-subtitle">Plus de 50 entreprises font confiance à JobConnect</p>
           </div>
           <div className="companies-logos">
-            <div className="company-badge">
-              <Building2 size={28} />
-              <span>Tech Corp</span>
-            </div>
-            <div className="company-badge">
-              <Building2 size={28} />
-              <span>Innovation Labs</span>
-            </div>
-            <div className="company-badge">
-              <Building2 size={28} />
-              <span>Digital Solutions</span>
-            </div>
-            <div className="company-badge">
-              <Building2 size={28} />
-              <span>Creative Agency</span>
-            </div>
-            <div className="company-badge">
-              <Building2 size={28} />
-              <span>StartUp Hub</span>
-            </div>
+            {PARTNER_COMPANIES.map((company) => (
+              <button
+                key={company.id}
+                type="button"
+                className="company-badge"
+                onClick={() => setPartnerDetail(company)}
+              >
+                <Building2 size={28} aria-hidden />
+                <span>{company.name}</span>
+              </button>
+            ))}
           </div>
         </div>
       </section>
+
+      <PartnerCompanyModal company={partnerDetail} onClose={() => setPartnerDetail(null)} />
 
       <section className="cta-section">
         <div className="container">
