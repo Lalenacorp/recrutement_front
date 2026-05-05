@@ -162,7 +162,7 @@ const EmployerDashboard = () => {
     }
   };
 
-  const getApplicationStatusLabel = (status: 'SUBMITTED' | 'REVIEWED' | 'ACCEPTED' | 'REJECTED') => {
+  const getApplicationStatusLabel = (status: 'SUBMITTED' | 'REVIEWED' | 'ACCEPTED' | 'REJECTED' | 'WITHDRAWN') => {
     switch (status) {
       case 'SUBMITTED':
         return 'Nouvelle';
