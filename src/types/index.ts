@@ -189,6 +189,7 @@ export interface CandidateMatchingProfile {
   profileEducationLevel: EducationLevel | null;
   preferredContractTypes: JobContractType[];
   jobMatchKeywords: string | null;
+  cvTextForMatching: string | null;
   profileComplete: boolean;
 }
 

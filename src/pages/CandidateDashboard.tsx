@@ -59,11 +59,13 @@ const CandidateDashboard = () => {
     education: EducationLevel | '';
     contracts: Set<JobContractType>;
     keywords: string;
+    cvTextForMatching: string;
   }>({
     experience: '',
     education: '',
     contracts: new Set(),
     keywords: '',
+    cvTextForMatching: '',
   });
   const [profileComplete, setProfileComplete] = useState(false);
   const [cvOptimizerOpenForJobId, setCvOptimizerOpenForJobId] = useState<number | null>(null);
@@ -86,6 +88,7 @@ const CandidateDashboard = () => {
         education: profile.profileEducationLevel ?? '',
         contracts: new Set(profile.preferredContractTypes ?? []),
         keywords: profile.jobMatchKeywords ?? '',
+        cvTextForMatching: profile.cvTextForMatching ?? '',
       });
       setMatches(list);
     } catch (err: unknown) {
@@ -143,6 +146,7 @@ const CandidateDashboard = () => {
         profileEducationLevel: profileForm.education || null,
         preferredContractTypes: [...profileForm.contracts],
         jobMatchKeywords: profileForm.keywords.trim() || null,
+        cvTextForMatching: profileForm.cvTextForMatching.trim() || null,
       });
       setProfileComplete(updated.profileComplete);
       const list = await jobMatchingApi.getJobMatches();
@@ -300,6 +304,16 @@ const CandidateDashboard = () => {
                       placeholder="ex. Java, commercial, logistique"
                       value={profileForm.keywords}
                       onChange={(ev) => setProfileForm((p) => ({ ...p, keywords: ev.target.value }))}
+                    />
+                  </label>
+                  <label className="matching-field matching-keywords">
+                    <span>Contenu CV pour le matching</span>
+                    <textarea
+                      rows={7}
+                      maxLength={20000}
+                      placeholder="Collez ici le texte de votre CV pour comparer avec les descriptions des offres"
+                      value={profileForm.cvTextForMatching}
+                      onChange={(ev) => setProfileForm((p) => ({ ...p, cvTextForMatching: ev.target.value }))}
                     />
                   </label>
                   <div className="matching-form-actions">

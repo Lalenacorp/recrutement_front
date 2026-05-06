@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { applicationApi } from '../api/applicationApi';
 import type { ApplicationResponse, ApplicationStatus } from '../types';
 
 const EmployerApplications = () => {
+  const [searchParams] = useSearchParams();
   const [applications, setApplications] = useState<ApplicationResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [updatingApplicationId, setUpdatingApplicationId] = useState<number | null>(null);
@@ -30,6 +31,26 @@ const EmployerApplications = () => {
   useEffect(() => {
     loadApplications();
   }, [loadApplications]);
+
+  const selectedJobId = useMemo(() => {
+    const rawJobId = searchParams.get('jobId');
+    if (!rawJobId) return null;
+    const parsed = Number(rawJobId);
+    return Number.isFinite(parsed) ? parsed : null;
+  }, [searchParams]);
+
+  const filteredApplications = useMemo(() => {
+    if (!selectedJobId) return applications;
+    return applications.filter((application) => application.jobId === selectedJobId);
+  }, [applications, selectedJobId]);
+
+  const selectedJobTitle = useMemo(() => {
+    if (!selectedJobId) return null;
+    return (
+      applications.find((application) => application.jobId === selectedJobId)?.jobTitle ??
+      `Offre #${selectedJobId}`
+    );
+  }, [applications, selectedJobId]);
 
   const getApplicationStatusLabel = (status: ApplicationStatus) => {
     switch (status) {
@@ -117,7 +138,11 @@ const EmployerApplications = () => {
 
           <div className="dashboard-section">
             <div className="section-header">
-              <h2>Candidatures reçues</h2>
+              <h2>
+                {selectedJobId && selectedJobTitle
+                  ? `Candidatures reçues - ${selectedJobTitle}`
+                  : 'Candidatures reçues'}
+              </h2>
               <Link className="btn btn-outline" to="/employer/dashboard">
                 Retour au dashboard
               </Link>
@@ -125,8 +150,12 @@ const EmployerApplications = () => {
 
             {loading ? (
               <p className="empty-state">Chargement des candidatures...</p>
-            ) : applications.length === 0 ? (
-              <p className="empty-state">Aucune candidature reçue pour le moment.</p>
+            ) : filteredApplications.length === 0 ? (
+              <p className="empty-state">
+                {selectedJobId
+                  ? 'Aucune candidature reçue pour ce poste pour le moment.'
+                  : 'Aucune candidature reçue pour le moment.'}
+              </p>
             ) : (
               <div className="dashboard-table-wrapper">
                 <table className="dashboard-table">
@@ -141,7 +170,7 @@ const EmployerApplications = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {applications.map((application) => {
+                    {filteredApplications.map((application) => {
                       const candidateName =
                         [application.candidateFirstName, application.candidateLastName].filter(Boolean).join(' ') ||
                         application.candidateEmail ||

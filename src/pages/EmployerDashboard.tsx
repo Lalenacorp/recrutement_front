@@ -428,13 +428,18 @@ const EmployerDashboard = () => {
                           <td>{applicationsPerJob[job.id] ?? 0}</td>
                           <td>{getStatusBadge(job.status)}</td>
                           <td>
-                            <button
-                              className="btn btn-sm btn-outline"
-                              onClick={() => handleViewDetails(job.id)}
-                              disabled={loadingDetails}
-                            >
-                              {loadingDetails ? 'Chargement...' : 'Voir'}
-                            </button>
+                            <div className="job-actions">
+                              <Link className="btn btn-sm btn-outline" to={`/employer/applications?jobId=${job.id}`}>
+                                Voir candidats
+                              </Link>
+                              <button
+                                className="btn btn-sm btn-outline"
+                                onClick={() => handleViewDetails(job.id)}
+                                disabled={loadingDetails}
+                              >
+                                {loadingDetails ? 'Chargement...' : 'Voir'}
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}

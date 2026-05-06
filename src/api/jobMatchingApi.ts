@@ -37,6 +37,7 @@ export type MatchingProfileUpdate = {
   profileEducationLevel: EducationLevel | null;
   preferredContractTypes: JobContractType[];
   jobMatchKeywords: string | null;
+  cvTextForMatching: string | null;
 };
 
 export const jobMatchingApi = {
@@ -57,6 +58,7 @@ export const jobMatchingApi = {
         profileEducationLevel: body.profileEducationLevel,
         preferredContractTypes: body.preferredContractTypes,
         jobMatchKeywords: body.jobMatchKeywords?.trim() || null,
+        cvTextForMatching: body.cvTextForMatching?.trim() || null,
       }),
     });
     return readJson<CandidateMatchingProfile>(response);
