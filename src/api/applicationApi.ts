@@ -1,4 +1,4 @@
-import type { ApplicationRequest, ApplicationResponse } from '../types';
+import type { ApplicationRequest, ApplicationResponse, ApplicationStatus } from '../types';
 import { ApiError } from './authApi';
 import { authFetch } from './authFetch';
 
@@ -108,6 +108,43 @@ export const applicationApi = {
         const errorData = await response.json().catch(() => ({}));
         throw new ApiError(
           errorData.message || errorData.error || 'Erreur lors de la récupération des candidatures employeur',
+          response.status,
+          errorData.errors
+        );
+      }
+
+      return await response.json();
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError('Erreur de connexion au serveur', 0);
+    }
+  },
+
+  /**
+   * Mettre à jour le statut d'une candidature pour l'employeur connecté
+   */
+  async updateEmployerApplicationStatus(
+    applicationId: number,
+    status: ApplicationStatus
+  ): Promise<ApplicationResponse> {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new ApiError('Non authentifié', 401);
+      }
+
+      const response = await authFetch(`${API_BASE_URL}/api/employers/applications/${applicationId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new ApiError(
+          errorData.message || errorData.error || 'Erreur lors de la mise à jour du statut',
           response.status,
           errorData.errors
         );

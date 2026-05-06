@@ -147,7 +147,9 @@ export interface PublicJobOffer {
 export type ApplicationStatus = 
   | 'SUBMITTED'   // Soumise
   | 'REVIEWED'    // Examinée
+  | 'INTERVIEW'   // Entretien
   | 'ACCEPTED'    // Acceptée
+  | 'HIRED'       // Embauchée
   | 'REJECTED'    // Rejetée
   | 'WITHDRAWN';  // Retirée
 
@@ -174,6 +176,7 @@ export interface ApplicationResponse {
   candidateFirstName?: string;
   candidateLastName?: string;
   candidateEmail?: string;
+  candidateSkills?: string;
   status: ApplicationStatus;
   createdAt: string;
   cvUrl?: string;

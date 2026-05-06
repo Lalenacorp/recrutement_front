@@ -14,6 +14,7 @@ import Events from './pages/Events';
 import EventDetails from './pages/EventDetails';
 import CandidateDashboard from './pages/CandidateDashboard';
 import EmployerDashboard from './pages/EmployerDashboard';
+import EmployerApplications from './pages/EmployerApplications';
 import AdminDashboard from './pages/AdminDashboard';
 import EmployerRegister from './pages/EmployerRegister';
 import VerifyEmail from './pages/VerifyEmail';
@@ -56,6 +57,7 @@ function AppContent() {
           <Route path="/etudes-canada" element={<StudyCanada />} />
           <Route path="/candidate/dashboard" element={<CandidateDashboard />} />
           <Route path="/employer/dashboard" element={<EmployerDashboard />} />
+          <Route path="/employer/applications" element={<EmployerApplications />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
         </Routes>
       </main>

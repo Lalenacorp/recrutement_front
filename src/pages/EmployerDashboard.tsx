@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { PlusCircle, Briefcase, Lock, Send, FileText, Users, Search } from 'lucide-react';
 import type {
@@ -22,7 +23,6 @@ const EmployerDashboard = () => {
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
-  const [loadingApplications, setLoadingApplications] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [selectedJob, setSelectedJob] = useState<JobDetails | null>(null);
@@ -59,13 +59,10 @@ const EmployerDashboard = () => {
 
   const loadApplications = useCallback(async () => {
     try {
-      setLoadingApplications(true);
       const data = await applicationApi.getMyEmployerApplications();
       setEmployerApplications(data);
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Erreur lors du chargement des candidatures'));
-    } finally {
-      setLoadingApplications(false);
     }
   }, []);
 
@@ -162,25 +159,9 @@ const EmployerDashboard = () => {
     }
   };
 
-  const getApplicationStatusLabel = (status: 'SUBMITTED' | 'REVIEWED' | 'ACCEPTED' | 'REJECTED' | 'WITHDRAWN') => {
-    switch (status) {
-      case 'SUBMITTED':
-        return 'Nouvelle';
-      case 'REVIEWED':
-        return 'Examinée';
-      case 'ACCEPTED':
-        return 'Acceptée';
-      case 'REJECTED':
-        return 'Refusée';
-      default:
-        return status;
-    }
-  };
-
   const activeJobs = jobs.filter((j) => j.status === 'PUBLISHED');
   const drafts = jobs.filter((j) => j.status === 'DRAFT');
   const totalApplications = employerApplications.length;
-  const recentApplications = employerApplications.slice(0, 5);
   const applicationsPerJob = employerApplications.reduce<Record<number, number>>((acc, app) => {
     acc[app.jobId] = (acc[app.jobId] || 0) + 1;
     return acc;
@@ -230,8 +211,8 @@ const EmployerDashboard = () => {
             <div className="stat-card">
               <FileText size={32} />
               <div>
-                <h3>{recentApplications.length}</h3>
-                <p>Candidatures récentes</p>
+                <h3>{employerApplications.filter((app) => app.status === 'HIRED' || app.status === 'ACCEPTED').length}</h3>
+                <p>Candidats embauchés</p>
               </div>
             </div>
           </div>
@@ -239,10 +220,15 @@ const EmployerDashboard = () => {
           <div className="dashboard-section">
             <div className="section-header">
               <h2>Tableau de bord employeur</h2>
-              <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
-                <PlusCircle size={18} />
-                Publier une offre d&apos;emploi
-              </button>
+              <div className="job-actions">
+                <Link className="btn btn-outline" to="/employer/applications">
+                  Gérer les candidatures
+                </Link>
+                <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
+                  <PlusCircle size={18} />
+                  Publier une offre d&apos;emploi
+                </button>
+              </div>
             </div>
 
             {showForm && (
@@ -454,34 +440,6 @@ const EmployerDashboard = () => {
                       ))}
                     </tbody>
                   </table>
-                </div>
-              )}
-            </div>
-
-            <div className="dashboard-subsection">
-              <h3>Candidatures récentes</h3>
-              {loadingApplications ? (
-                <p className="empty-state">Chargement des candidatures...</p>
-              ) : recentApplications.length === 0 ? (
-                <p className="empty-state">Aucune candidature récente disponible pour l&apos;instant.</p>
-              ) : (
-                <div className="jobs-list">
-                  {recentApplications.map((application) => (
-                    <div key={application.applicationId} className="job-item">
-                      <div>
-                        <h3>
-                          {[application.candidateFirstName, application.candidateLastName]
-                            .filter(Boolean)
-                            .join(' ') || application.candidateEmail || 'Candidat'}
-                        </h3>
-                        <p>{application.jobTitle}</p>
-                        <small>Reçue le {new Date(application.createdAt).toLocaleDateString('fr-FR')}</small>
-                      </div>
-                      <div className="job-actions">
-                        <span className="badge badge-info">{getApplicationStatusLabel(application.status)}</span>
-                      </div>
-                    </div>
-                  ))}
                 </div>
               )}
             </div>
