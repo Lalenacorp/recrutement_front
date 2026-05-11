@@ -1,7 +1,10 @@
 import { Briefcase, Phone, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 
 const Footer = () => {
+  const { language } = useLanguage();
+  const isEn = language === 'en';
   return (
     <footer className="footer">
       <div className="footer-inner">
@@ -9,19 +12,21 @@ const Footer = () => {
           <div className="footer-section footer-section--brand">
             <div className="footer-logo">
               <Briefcase size={28} aria-hidden />
-              <span>JobConnect</span>
+              <span>SNJobConnect</span>
             </div>
             <p className="footer-tagline">
-              La plateforme de recrutement qui connecte les talents avec les opportunités.
+              {isEn
+                ? 'Senegal\'s #1 platform for jobs, training and study abroad.'
+                : "La plateforme #1 au Sénégal pour l'emploi, la formation et les études à l'étranger."}
             </p>
           </div>
 
-          <nav className="footer-section footer-section--links" aria-label="Liens du pied de page">
-            <h4>Liens rapides</h4>
-            <Link to="/jobs">Offres d&apos;emploi</Link>
-            <Link to="/contests">Concours</Link>
-            <Link to="/events">Événements</Link>
-            <Link to="/about">À propos</Link>
+          <nav className="footer-section footer-section--links" aria-label={isEn ? 'Footer links' : 'Liens du pied de page'}>
+            <h4>{isEn ? 'Quick links' : 'Liens rapides'}</h4>
+            <Link to="/jobs">{isEn ? 'Jobs' : 'Offres d&apos;emploi'}</Link>
+            <Link to="/contests">{isEn ? 'Contests' : 'Concours'}</Link>
+            <Link to="/events">{isEn ? 'Events' : 'Événements'}</Link>
+            <Link to="/about">{isEn ? 'About' : 'À propos'}</Link>
           </nav>
 
           <div className="footer-section footer-section--contact">
@@ -32,13 +37,13 @@ const Footer = () => {
             </div>
             <div className="contact-info">
               <MapPin size={18} strokeWidth={2} aria-hidden />
-              <span>Dakar, Sénégal</span>
+              <span>{isEn ? 'Dakar, Senegal' : 'Dakar, Sénégal'}</span>
             </div>
           </div>
         </div>
 
         <div className="footer-bottom">
-          <p>&copy; {new Date().getFullYear()} JobConnect. Tous droits réservés.</p>
+          <p>&copy; {new Date().getFullYear()} SNJobConnect. {isEn ? 'All rights reserved.' : 'Tous droits réservés.'}</p>
         </div>
       </div>
     </footer>

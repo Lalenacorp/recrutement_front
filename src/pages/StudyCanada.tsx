@@ -11,8 +11,10 @@ import {
 } from 'lucide-react';
 import { submitPreInscription } from '../api/preInscriptionApi';
 import { ApiError } from '../api/authApi';
+import { useLanguage } from '../context/LanguageContext';
+import { useSEO } from '../utils/useSEO';
 
-const DOSSIER_PIECES = [
+const DOSSIER_PIECES_FR = [
   'Une fiche de renseignement à remplir',
   'Copie du passeport',
   "Copie de l'extrait de naissance",
@@ -22,8 +24,18 @@ const DOSSIER_PIECES = [
   'Petite photo',
 ] as const;
 
-const FRAIS_ACCOMPAGNEMENT = [
-  { label: "Frais d'ouverture de dossier", amount: '50.000 F CFA' },
+const DOSSIER_PIECES_EN = [
+  'Completed information form',
+  'Passport copy',
+  'Birth certificate copy',
+  'Copies of diplomas and transcripts (High school)',
+  "Copies of bachelor's diplomas and transcripts (if applicable)",
+  'CV and cover letter',
+  'Passport photo',
+] as const;
+
+const FRAIS_ACCOMPAGNEMENT_FR = [
+  { label: "Frais d'ouverture de dossier", amount: '75.000 F CFA' },
   { label: 'Frais de procédure et de suivi', amount: '350.000 F CFA' },
   {
     label: "Frais d'honoraires (payables après l'obtention du visa)",
@@ -31,13 +43,28 @@ const FRAIS_ACCOMPAGNEMENT = [
   },
 ] as const;
 
-const FRAIS_GOUV = [
+const FRAIS_ACCOMPAGNEMENT_EN = [
+  { label: 'File opening fee', amount: '750000 CFA' },
+  { label: 'Procedure and follow-up fee', amount: '350,000 CFA' },
+  {
+    label: 'Professional fee (payable after visa approval)',
+    amount: '400,000 CFA',
+  },
+] as const;
+
+const FRAIS_GOUV_FR = [
   { label: 'Frais test Bright', amount: '56.200 F CFA' },
   { label: 'Frais de CAQ', amount: '80.000 F CFA' },
   { label: "Frais de visa à l'ambassade", amount: '122.000 F CFA' },
 ] as const;
 
-const FORM_STEP_LABELS = [
+const FRAIS_GOUV_EN = [
+  { label: 'Bright test fee', amount: '56,200 CFA' },
+  { label: 'CAQ fee', amount: '80,000 CFA' },
+  { label: 'Embassy visa fee', amount: '122,000 CFA' },
+] as const;
+
+const FORM_STEP_LABELS_FR = [
   'Identité',
   'Coordonnées',
   'Famille & formation',
@@ -45,7 +72,15 @@ const FORM_STEP_LABELS = [
   'Antécédents Canada',
 ] as const;
 
-const TOTAL_STEPS = FORM_STEP_LABELS.length;
+const FORM_STEP_LABELS_EN = [
+  'Identity',
+  'Contact details',
+  'Family & education',
+  'Education history',
+  'Canada history',
+] as const;
+
+const TOTAL_STEPS = FORM_STEP_LABELS_FR.length;
 
 const DRAFT_KEY = 'studyCanadaPreInscriptionDraft';
 
@@ -71,6 +106,36 @@ function applyDraftValueToNamedControl(
 }
 
 const StudyCanada = () => {
+  const { language } = useLanguage();
+  const isEn = language === 'en';
+
+  useSEO({
+    title: isEn ? 'Study in Canada from Senegal' : 'Étudier au Canada depuis le Sénégal',
+    description: isEn
+      ? 'Complete program to study in Canada from Senegal: admissions, visa, accommodation and support. Apply with SNJobConnect today.'
+      : "Programme complet pour étudier au Canada depuis le Sénégal : admissions, visa, logement et accompagnement. Lancez votre pré-inscription sur SNJobConnect.",
+    path: '/espace-etudiant',
+    keywords:
+      "études Canada, étudier au Canada, visa étudiant Canada, université Canada Sénégal, pré-inscription, accompagnement étudiant",
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'Service',
+      name: isEn ? 'Study in Canada — Senegal program' : 'Études au Canada — Programme Sénégal',
+      provider: {
+        '@type': 'Organization',
+        name: 'SNJobConnect',
+        url: 'https://snjobconnect.com/',
+      },
+      areaServed: { '@type': 'Country', name: 'Senegal' },
+      serviceType: 'Education abroad consulting',
+      url: 'https://snjobconnect.com/espace-etudiant',
+    },
+  });
+
+  const dossierPieces = isEn ? DOSSIER_PIECES_EN : DOSSIER_PIECES_FR;
+  const fraisAccompagnement = isEn ? FRAIS_ACCOMPAGNEMENT_EN : FRAIS_ACCOMPAGNEMENT_FR;
+  const fraisGouv = isEn ? FRAIS_GOUV_EN : FRAIS_GOUV_FR;
+  const stepLabels = isEn ? FORM_STEP_LABELS_EN : FORM_STEP_LABELS_FR;
   const formRef = useRef<HTMLFormElement>(null);
   const draftSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [step, setStep] = useState(0);
@@ -208,7 +273,7 @@ const StudyCanada = () => {
         /* ignore */
       }
     } catch (err) {
-      setSubmitError(err instanceof ApiError ? err.message : 'Impossible de contacter le serveur.');
+      setSubmitError(err instanceof ApiError ? err.message : (isEn ? 'Unable to reach server.' : 'Impossible de contacter le serveur.'));
     } finally {
       setSubmitting(false);
     }
@@ -218,11 +283,12 @@ const StudyCanada = () => {
     <div className="study-canada-page">
       <section className="study-canada-hero">
         <div className="container">
-          <span className="section-badge">Études à l'étranger</span>
-          <h1>Inscription et procédures — études à l'étranger</h1>
+          <span className="section-badge">{isEn ? 'Student Space' : 'Espace Étudiant'}</span>
+          <h1>{isEn ? 'Registration and procedures — Student Space' : 'Inscription et procédures — Espace Étudiant'}</h1>
           <p>
-            Ouverture de dossier pédagogique, pièces à fournir, frais et formulaire de
-            renseignements pour votre projet d&apos;études.
+            {isEn
+              ? 'File opening, required documents, fees and information form for your study project.'
+              : 'Ouverture de dossier pédagogique, pièces à fournir, frais et formulaire de renseignements pour votre projet d&apos;études.'}
           </p>
         </div>
       </section>
@@ -233,34 +299,35 @@ const StudyCanada = () => {
             <article className="study-card study-procedure-card">
               <div className="study-card-header">
                 <GraduationCap size={24} />
-                <h2>Notre mission</h2>
+                <h2>{isEn ? 'Our mission' : 'Notre mission'}</h2>
               </div>
               <p>
-                Notre mission consiste à vous trouver un établissement, à vous assister dans
-                l&apos;élaboration de votre projet d&apos;étude et à vous préparer à l&apos;entretien
-                que vous effectuerez à l&apos;ambassade ou au consulat.
+                {isEn
+                  ? 'Our mission is to help you find an institution, support your study plan and prepare you for the embassy/consulate interview.'
+                  : 'Notre mission consiste à vous trouver un établissement, à vous assister dans l&apos;élaboration de votre projet d&apos;étude et à vous préparer à l&apos;entretien que vous effectuerez à l&apos;ambassade ou au consulat.'}
               </p>
               <p className="study-procedure-lead">
-                L&apos;accès à vos services nécessite l&apos;ouverture de dossier pédagogique qui sera
-                constitué des pièces suivantes :
+                {isEn
+                  ? 'Access to our services requires opening a study file with the following documents:'
+                  : 'L&apos;accès à vos services nécessite l&apos;ouverture de dossier pédagogique qui sera constitué des pièces suivantes :'}
               </p>
               <ul className="study-doc-list">
-                {DOSSIER_PIECES.map((item) => (
+                {dossierPieces.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>
               <p className="study-nb">
-                <strong>NB :</strong> les dossiers des étudiants sont traités avec la plus grande
-                diligence ; les démarches (courriers, fax, mandats internationaux, etc.) nous
-                obligent à exiger des frais liés au traitement des dossiers.
+                <strong>NB :</strong> {isEn
+                  ? 'student files are handled with great care; procedures (letters, fax, international transfers, etc.) require processing fees.'
+                  : 'les dossiers des étudiants sont traités avec la plus grande diligence ; les démarches (courriers, fax, mandats internationaux, etc.) nous obligent à exiger des frais liés au traitement des dossiers.'}
               </p>
             </article>
 
             <article className="study-card">
-              <h3 className="study-subheading">Frais d&apos;accompagnement</h3>
+              <h3 className="study-subheading">{isEn ? 'Support fees' : "Frais d'accompagnement"}</h3>
               <table className="study-fees-table">
                 <tbody>
-                  {FRAIS_ACCOMPAGNEMENT.map((row) => (
+                  {fraisAccompagnement.map((row) => (
                     <tr key={row.label}>
                       <td>{row.label}</td>
                       <td>{row.amount}</td>
@@ -269,11 +336,11 @@ const StudyCanada = () => {
                 </tbody>
               </table>
               <h3 className="study-subheading study-subheading-spaced">
-                Frais gouvernementaux et test de langues
+                {isEn ? 'Government fees and language test' : 'Frais gouvernementaux et test de langues'}
               </h3>
               <table className="study-fees-table">
                 <tbody>
-                  {FRAIS_GOUV.map((row) => (
+                  {fraisGouv.map((row) => (
                     <tr key={row.label}>
                       <td>{row.label}</td>
                       <td>{row.amount}</td>
@@ -284,7 +351,7 @@ const StudyCanada = () => {
             </article>
 
             <aside className="study-contact-card">
-              <h3 className="study-subheading">Contact — Dakar</h3>
+              <h3 className="study-subheading">{isEn ? 'Contact — Dakar' : 'Contact — Dakar'}</h3>
               <ul className="study-contact-list">
                 <li>
                   <Phone size={18} aria-hidden />
@@ -305,19 +372,19 @@ const StudyCanada = () => {
                   </span>
                 </li>
               </ul>
-              <p className="study-contact-tagline">Nous avons votre succès à cœur</p>
+              <p className="study-contact-tagline">{isEn ? 'Your success matters to us' : 'Nous avons votre succès à cœur'}</p>
             </aside>
           </div>
 
           <article className="study-card study-fiche-card">
             <div className="study-card-header">
               <FileText size={24} />
-              <h2>Fiche de renseignement</h2>
+              <h2>{isEn ? 'Information form' : 'Fiche de renseignement'}</h2>
             </div>
             <p>
-              Reprend les rubriques de la fiche papier officielle. Les pièces justificatives (copies,
-              photo, etc.) sont à fournir lors de l&apos;ouverture de dossier sur place ou selon les
-              consignes du centre.
+              {isEn
+                ? 'This form follows the official paper version sections. Supporting documents (copies, photo, etc.) must be provided when opening your file on site or as instructed by the center.'
+                : 'Reprend les rubriques de la fiche papier officielle. Les pièces justificatives (copies, photo, etc.) sont à fournir lors de l&apos;ouverture de dossier sur place ou selon les consignes du centre.'}
             </p>
             {submitError && (
               <p className="study-form-error" role="alert">
@@ -333,32 +400,32 @@ const StudyCanada = () => {
             >
               <div className="study-step-panel" data-step-panel="0" hidden={step !== 0}>
               <label className="study-field">
-                <span>Date d&apos;inscription</span>
+                <span>{isEn ? 'Registration date' : "Date d'inscription"}</span>
                 <input type="date" name="dateInscription" required />
               </label>
 
               <fieldset className="study-fieldset">
-                <legend>Identité</legend>
+                <legend>{isEn ? 'Identity' : 'Identité'}</legend>
                 <div className="study-form-row">
                   <label className="study-field">
-                    <span>Nom</span>
+                    <span>{isEn ? 'Last name' : 'Nom'}</span>
                     <input type="text" name="nom" required />
                   </label>
                   <label className="study-field">
-                    <span>Prénom</span>
+                    <span>{isEn ? 'First name' : 'Prénom'}</span>
                     <input type="text" name="prenom" required />
                   </label>
                 </div>
                 <div className="study-form-row">
                   <label className="study-field">
-                    <span>Date de naissance</span>
+                    <span>{isEn ? 'Date of birth' : 'Date de naissance'}</span>
                     <input type="date" name="dateNaissance" required />
                   </label>
                   <label className="study-field">
-                    <span>Sexe</span>
+                    <span>{isEn ? 'Gender' : 'Sexe'}</span>
                     <select name="sexe" required defaultValue="">
                       <option value="" disabled>
-                        Choisir
+                        {isEn ? 'Choose' : 'Choisir'}
                       </option>
                       <option value="F">F</option>
                       <option value="M">M</option>
@@ -366,15 +433,15 @@ const StudyCanada = () => {
                   </label>
                 </div>
                 <label className="study-field">
-                  <span>Lieu de naissance (ville et pays)</span>
+                  <span>{isEn ? 'Place of birth (city and country)' : 'Lieu de naissance (ville et pays)'}</span>
                   <input type="text" name="lieuNaissance" required />
                 </label>
                 <label className="study-field">
-                  <span>Adresse</span>
+                  <span>{isEn ? 'Address' : 'Adresse'}</span>
                   <textarea name="adresse" rows={2} required />
                 </label>
                 <label className="study-field">
-                  <span>N° passeport</span>
+                  <span>{isEn ? 'Passport number' : 'N° passeport'}</span>
                   <input type="text" name="numeroPasseport" required />
                 </label>
               </fieldset>
@@ -382,10 +449,10 @@ const StudyCanada = () => {
 
               <div className="study-step-panel" data-step-panel="1" hidden={step !== 1}>
               <fieldset className="study-fieldset">
-                <legend>Coordonnées</legend>
+                <legend>{isEn ? 'Contact details' : 'Coordonnées'}</legend>
                 <div className="study-form-row">
                   <label className="study-field">
-                    <span>Téléphone</span>
+                    <span>{isEn ? 'Phone' : 'Téléphone'}</span>
                     <input type="tel" name="telephone" required />
                   </label>
                   <label className="study-field">
@@ -394,7 +461,7 @@ const StudyCanada = () => {
                   </label>
                 </div>
                 <label className="study-field">
-                  <span>Tél. personne à contacter en cas d&apos;urgence</span>
+                    <span>{isEn ? 'Emergency contact phone' : "Tél. personne à contacter en cas d'urgence"}</span>
                   <input type="tel" name="telephoneUrgence" required />
                 </label>
               </fieldset>
@@ -402,31 +469,31 @@ const StudyCanada = () => {
 
               <div className="study-step-panel" data-step-panel="2" hidden={step !== 2}>
               <fieldset className="study-fieldset">
-                <legend>Famille &amp; parcours</legend>
+                <legend>{isEn ? 'Family & path' : 'Famille & parcours'}</legend>
                 <label className="study-field">
-                  <span>Situation matrimoniale</span>
+                  <span>{isEn ? 'Marital status' : 'Situation matrimoniale'}</span>
                   <input type="text" name="situationMatrimoniale" required />
                 </label>
                 <label className="study-field">
-                  <span>Dernier diplôme obtenu</span>
+                  <span>{isEn ? 'Latest diploma obtained' : 'Dernier diplôme obtenu'}</span>
                   <input type="text" name="dernierDiplome" required />
                 </label>
                 <div className="study-form-row">
                   <label className="study-field">
-                    <span>Nom et prénom du père</span>
+                    <span>{isEn ? "Father's full name" : 'Nom et prénom du père'}</span>
                     <input type="text" name="nomPere" required />
                   </label>
                   <label className="study-field">
-                    <span>Nom et prénom de la mère</span>
+                    <span>{isEn ? "Mother's full name" : 'Nom et prénom de la mère'}</span>
                     <input type="text" name="nomMere" required />
                   </label>
                 </div>
                 <label className="study-field">
-                  <span>Comment nous avez-vous connus ?</span>
+                  <span>{isEn ? 'How did you hear about us?' : 'Comment nous avez-vous connus ?'}</span>
                   <input type="text" name="commentConnu" required />
                 </label>
                 <label className="study-field">
-                  <span>Formation souhaitée</span>
+                  <span>{isEn ? 'Desired program' : 'Formation souhaitée'}</span>
                   <textarea name="formationSouhaitee" rows={2} required />
                 </label>
               </fieldset>
@@ -434,45 +501,45 @@ const StudyCanada = () => {
 
               <div className="study-step-panel" data-step-panel="3" hidden={step !== 3}>
               <fieldset className="study-fieldset">
-                <legend>Établissements fréquentés — Lycée</legend>
+                <legend>{isEn ? 'Schools attended — High school' : 'Établissements fréquentés — Lycée'}</legend>
                 <label className="study-field">
-                  <span>Nom du lycée</span>
+                  <span>{isEn ? 'High school name' : 'Nom du lycée'}</span>
                   <input type="text" name="lyceeNom" />
                 </label>
                 <div className="study-form-row">
                   <label className="study-field">
-                    <span>Diplôme obtenu</span>
+                    <span>{isEn ? 'Diploma obtained' : 'Diplôme obtenu'}</span>
                     <input type="text" name="lyceeDiplome" />
                   </label>
                   <label className="study-field">
-                    <span>Série</span>
+                    <span>{isEn ? 'Track' : 'Série'}</span>
                     <input type="text" name="lyceeSerie" />
                   </label>
                 </div>
                 <label className="study-field">
-                  <span>De quelle année à quelle année ?</span>
-                  <input type="text" name="lyceePeriode" placeholder="ex. 2018 – 2021" />
+                  <span>{isEn ? 'From which year to which year?' : 'De quelle année à quelle année ?'}</span>
+                  <input type="text" name="lyceePeriode" placeholder={isEn ? 'e.g. 2018 – 2021' : 'ex. 2018 – 2021'} />
                 </label>
               </fieldset>
 
               <fieldset className="study-fieldset">
-                <legend>Établissements fréquentés — Université (si applicable)</legend>
+                <legend>{isEn ? 'Schools attended — University (if applicable)' : 'Établissements fréquentés — Université (si applicable)'}</legend>
                 <label className="study-field">
-                  <span>Nom de l&apos;université</span>
+                  <span>{isEn ? 'University name' : "Nom de l'université"}</span>
                   <input type="text" name="universiteNom" />
                 </label>
                 <div className="study-form-row">
                   <label className="study-field">
-                    <span>Diplôme obtenu</span>
+                    <span>{isEn ? 'Diploma obtained' : 'Diplôme obtenu'}</span>
                     <input type="text" name="universiteDiplome" />
                   </label>
                   <label className="study-field">
-                    <span>Filière</span>
+                    <span>{isEn ? 'Major' : 'Filière'}</span>
                     <input type="text" name="universiteFiliere" />
                   </label>
                 </div>
                 <label className="study-field">
-                  <span>De quelle année à quelle année ?</span>
+                  <span>{isEn ? 'From which year to which year?' : 'De quelle année à quelle année ?'}</span>
                   <input type="text" name="universitePeriode" />
                 </label>
               </fieldset>
@@ -480,45 +547,45 @@ const StudyCanada = () => {
 
               <div className="study-step-panel" data-step-panel="4" hidden={step !== 4}>
               <fieldset className="study-fieldset">
-                <legend>Antécédents Canada</legend>
+                <legend>{isEn ? 'Canada history' : 'Antécédents Canada'}</legend>
                 <label className="study-field">
-                  <span>Avez-vous déjà eu une admission au Canada ?</span>
+                  <span>{isEn ? 'Have you already received an admission in Canada?' : 'Avez-vous déjà eu une admission au Canada ?'}</span>
                   <select name="admissionCanada" defaultValue="">
                     <option value="">—</option>
-                    <option value="non">Non</option>
-                    <option value="oui">Oui</option>
+                    <option value="non">{isEn ? 'No' : 'Non'}</option>
+                    <option value="oui">{isEn ? 'Yes' : 'Oui'}</option>
                   </select>
                 </label>
                 <label className="study-field">
-                  <span>Si oui : collège ou université</span>
+                  <span>{isEn ? 'If yes: college or university' : 'Si oui : collège ou université'}</span>
                   <input type="text" name="admissionCanadaEtablissement" />
                 </label>
                 <label className="study-field">
-                  <span>Si oui : quelle année ?</span>
+                  <span>{isEn ? 'If yes: which year?' : 'Si oui : quelle année ?'}</span>
                   <input type="text" name="admissionCanadaAnnee" />
                 </label>
                 <label className="study-field">
-                  <span>Formation choisie (précision)</span>
+                  <span>{isEn ? 'Chosen program (details)' : 'Formation choisie (précision)'}</span>
                   <input type="text" name="formationChoisie" />
                 </label>
                 <label className="study-field">
-                  <span>Quelqu&apos;un vous a aidé à faire l&apos;admission ?</span>
+                  <span>{isEn ? 'Did someone help you with admission?' : "Quelqu'un vous a aidé à faire l'admission ?"}</span>
                   <input type="text" name="aideAdmission" />
                 </label>
                 <label className="study-field">
-                  <span>Avez-vous déjà déposé un visa pour le Canada ?</span>
+                  <span>{isEn ? 'Have you already applied for a Canada visa?' : 'Avez-vous déjà déposé un visa pour le Canada ?'}</span>
                   <select name="dejaVisaCanada" defaultValue="">
                     <option value="">—</option>
-                    <option value="non">Non</option>
-                    <option value="oui">Oui</option>
+                    <option value="non">{isEn ? 'No' : 'Non'}</option>
+                    <option value="oui">{isEn ? 'Yes' : 'Oui'}</option>
                   </select>
                 </label>
                 <label className="study-field">
-                  <span>Si oui : quelle année ?</span>
+                  <span>{isEn ? 'If yes: which year?' : 'Si oui : quelle année ?'}</span>
                   <input type="text" name="visaCanadaAnnee" />
                 </label>
                 <label className="study-field">
-                  <span>Si refus : raison du refus</span>
+                  <span>{isEn ? 'If refused: reason for refusal' : 'Si refus : raison du refus'}</span>
                   <textarea name="visaRefusRaison" rows={2} />
                 </label>
               </fieldset>
@@ -526,15 +593,15 @@ const StudyCanada = () => {
 
               <div className="study-steps-footer">
                 <p className="study-steps-counter">
-                  Étape {step + 1} sur {TOTAL_STEPS} — {FORM_STEP_LABELS[step]}
+                  {isEn ? `Step ${step + 1} of ${TOTAL_STEPS}` : `Étape ${step + 1} sur ${TOTAL_STEPS}`} — {stepLabels[step]}
                 </p>
-                <div className="study-steps-progress" role="list" aria-label="Progression du formulaire">
-                  {FORM_STEP_LABELS.map((label, i) => (
+                <div className="study-steps-progress" role="list" aria-label={isEn ? 'Form progress' : 'Progression du formulaire'}>
+                  {stepLabels.map((label, i) => (
                     <span
                       key={label}
                       role="listitem"
                       className={`study-step-dot ${i < step ? 'done' : ''} ${i === step ? 'active' : ''} ${i > step ? 'future' : ''}`}
-                      aria-label={`Étape ${i + 1} : ${label}`}
+                      aria-label={isEn ? `Step ${i + 1}: ${label}` : `Étape ${i + 1} : ${label}`}
                       aria-current={i === step ? 'step' : undefined}
                     >
                       {i + 1}
@@ -551,17 +618,17 @@ const StudyCanada = () => {
                   disabled={step === 0 || submitting}
                 >
                   <ChevronLeft size={18} />
-                  Précédent
+                  {isEn ? 'Previous' : 'Précédent'}
                 </button>
                 {step < TOTAL_STEPS - 1 ? (
                   <button type="button" className="btn btn-primary study-step-btn-next" onClick={goNext}>
-                    Suivant
+                    {isEn ? 'Next' : 'Suivant'}
                     <ChevronRight size={18} />
                   </button>
                 ) : (
                   <button type="submit" className="btn btn-primary study-submit-btn" disabled={submitting}>
                     <FileText size={18} />
-                    {submitting ? 'Envoi en cours…' : 'Envoyer ma fiche de renseignement'}
+                    {submitting ? (isEn ? 'Sending...' : 'Envoi en cours…') : (isEn ? 'Submit my information form' : 'Envoyer ma fiche de renseignement')}
                   </button>
                 )}
               </div>
@@ -569,8 +636,9 @@ const StudyCanada = () => {
             {ficheSent && (
               <p className="study-success-message">
                 <CheckCircle size={18} />
-                Votre fiche a bien été enregistrée. Pensez à déposer les pièces du dossier sur place
-                selon les consignes qui vous seront communiquées.
+                {isEn
+                  ? 'Your form has been saved. Please submit your supporting documents on site as instructed.'
+                  : 'Votre fiche a bien été enregistrée. Pensez à déposer les pièces du dossier sur place selon les consignes qui vous seront communiquées.'}
               </p>
             )}
           </article>

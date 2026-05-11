@@ -1,12 +1,153 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>recrutement_front</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- Primary SEO -->
+    <title>SNJobConnect | Emploi, Formation & Espace Étudiant au Sénégal</title>
+    <meta
+      name="description"
+      content="SNJobConnect est la plateforme #1 au Sénégal pour trouver un emploi, postuler aux concours, découvrir des formations et préparer vos études à l'étranger (Canada, Europe). Candidats, employeurs et étudiants : connectez-vous aux meilleures opportunités."
+    />
+    <meta
+      name="keywords"
+      content="emploi Sénégal, offres d'emploi Dakar, recrutement Sénégal, concours Sénégal, formations Sénégal, études Canada, études à l'étranger, stage Sénégal, job Sénégal, plateforme emploi, SNJobConnect"
+    />
+    <meta name="author" content="SNJobConnect" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="language" content="French" />
+    <meta name="geo.region" content="SN" />
+    <meta name="geo.placename" content="Dakar, Sénégal" />
+    <meta name="theme-color" content="#00427E" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="SNJobConnect" />
+    <meta name="application-name" content="SNJobConnect" />
+    <meta name="msapplication-TileColor" content="#00427E" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- Canonical & alternates -->
+    <link rel="canonical" href="https://snjobconnect.com/" />
+    <link rel="alternate" hreflang="fr" href="https://snjobconnect.com/" />
+    <link rel="alternate" hreflang="en" href="https://snjobconnect.com/?lang=en" />
+    <link rel="alternate" hreflang="x-default" href="https://snjobconnect.com/" />
+
+    <!-- Favicons & manifest -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="mask-icon" href="/favicon.svg" color="#00427E" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SNJobConnect" />
+    <meta property="og:url" content="https://snjobconnect.com/" />
+    <meta property="og:title" content="SNJobConnect | Emploi, Formation & Espace Étudiant au Sénégal" />
+    <meta
+      property="og:description"
+      content="La plateforme de référence au Sénégal pour l'emploi, les concours, la formation et les études à l'étranger. Plus de 50 000 candidats et 50+ entreprises partenaires."
+    />
+    <meta property="og:image" content="https://snjobconnect.com/og-image.png" />
+    <meta property="og:image:secure_url" content="https://snjobconnect.com/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="SNJobConnect — Emploi, Formation et Espace Étudiant au Sénégal" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:locale:alternate" content="en_US" />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@SNJobConnect" />
+    <meta name="twitter:creator" content="@SNJobConnect" />
+    <meta name="twitter:title" content="SNJobConnect | Emploi, Formation & Espace Étudiant au Sénégal" />
+    <meta
+      name="twitter:description"
+      content="Trouvez un emploi, postulez aux concours, découvrez des formations et préparez vos études à l'étranger depuis le Sénégal."
+    />
+    <meta name="twitter:image" content="https://snjobconnect.com/og-image.png" />
+    <meta name="twitter:image:alt" content="SNJobConnect — Plateforme #1 d'emploi et de formation au Sénégal" />
+
+    <!-- Performance hints -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+
+    <!-- JSON-LD: Organization -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "SNJobConnect",
+        "alternateName": "SN Job Connect",
+        "url": "https://snjobconnect.com/",
+        "logo": "https://snjobconnect.com/favicon.svg",
+        "description": "Plateforme sénégalaise dédiée à l'emploi, aux concours, à la formation et aux études à l'étranger.",
+        "foundingDate": "2025",
+        "areaServed": {
+          "@type": "Country",
+          "name": "Sénégal"
+        },
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "SN",
+          "addressLocality": "Dakar"
+        },
+        "sameAs": [
+          "https://www.facebook.com/snjobconnect",
+          "https://www.linkedin.com/company/snjobconnect",
+          "https://twitter.com/snjobconnect"
+        ]
+      }
+    </script>
+
+    <!-- JSON-LD: WebSite + SearchAction -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "SNJobConnect",
+        "url": "https://snjobconnect.com/",
+        "inLanguage": ["fr-FR", "en-US"],
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://snjobconnect.com/jobs?q={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
+
+    <!-- JSON-LD: WebApplication -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "SNJobConnect",
+        "url": "https://snjobconnect.com/",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Any",
+        "description": "Plateforme #1 de recrutement, concours et formation au Sénégal.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "XOF"
+        }
+      }
+    </script>
   </head>
   <body>
+    <noscript>
+      SNJobConnect — la plateforme #1 d'emploi, de concours, de formation et d'études à l'étranger au Sénégal.
+      Activez JavaScript pour profiter pleinement de l'expérience.
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

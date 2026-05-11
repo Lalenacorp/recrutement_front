@@ -21,6 +21,7 @@ import VerifyEmail from './pages/VerifyEmail';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import StudyCanada from './pages/StudyCanada';
+import { LanguageProvider } from './context/LanguageContext';
 import './App.css';
 
 function AppContent() {
@@ -54,7 +55,8 @@ function AppContent() {
           <Route path="/contests/:id" element={<ContestDetails />} />
           <Route path="/events" element={<Events />} />
           <Route path="/events/:id" element={<EventDetails />} />
-          <Route path="/etudes-canada" element={<StudyCanada />} />
+          <Route path="/espace-etudiant" element={<StudyCanada />} />
+          <Route path="/etudes-canada" element={<Navigate to="/espace-etudiant" replace />} />
           <Route path="/candidate/dashboard" element={<CandidateDashboard />} />
           <Route path="/employer/dashboard" element={<EmployerDashboard />} />
           <Route path="/employer/applications" element={<EmployerApplications />} />
@@ -70,7 +72,9 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <AppContent />
+        <LanguageProvider>
+          <AppContent />
+        </LanguageProvider>
       </AuthProvider>
     </Router>
   );

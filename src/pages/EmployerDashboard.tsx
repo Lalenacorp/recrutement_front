@@ -15,9 +15,55 @@ import { employerJobApi } from '../api/employerJobApi';
 import { applicationApi } from '../api/applicationApi';
 import ChangePasswordForm from '../components/ChangePasswordForm';
 import JobDetailsModal from '../components/JobDetailsModal';
+import { useLanguage } from '../context/LanguageContext';
+import { useSEO } from '../utils/useSEO';
+
+const SENEGAL_REGIONS = [
+  'Dakar',
+  'Diourbel',
+  'Fatick',
+  'Kaffrine',
+  'Kaolack',
+  'Kedougou',
+  'Kolda',
+  'Louga',
+  'Matam',
+  'Saint-Louis',
+  'Sedhiou',
+  'Tambacounda',
+  'Thies',
+  'Ziguinchor',
+] as const;
+
+type WorkMode = 'REMOTE' | 'HYBRID' | 'ON_SITE';
+
+interface EmployerJobFormData {
+  title: string;
+  positionsCount: number;
+  jobDescription: string;
+  requirements: string;
+  location: string;
+  salaryMin: number;
+  salaryMax: number;
+  salaryCurrency: string;
+  contractType: JobContractType;
+  workMode: WorkMode;
+  experienceLevel: ExperienceLevel;
+  educationLevel: EducationLevel;
+  skills: string[];
+}
 
 const EmployerDashboard = () => {
+  const { language } = useLanguage();
+  const isEn = language === 'en';
   const { user } = useAuth();
+
+  useSEO({
+    title: 'Espace employeur',
+    description: "Tableau de bord employeur SNJobConnect — publiez vos offres d'emploi, gérez vos candidatures et suivez vos recrutements.",
+    path: '/employer/dashboard',
+    noIndex: true,
+  });
   const [jobs, setJobs] = useState<JobResponse[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
@@ -28,20 +74,23 @@ const EmployerDashboard = () => {
   const [selectedJob, setSelectedJob] = useState<JobDetails | null>(null);
   const [employerApplications, setEmployerApplications] = useState<ApplicationResponse[]>([]);
 
-  const [formData, setFormData] = useState<JobCreateRequest>({
+  const [formData, setFormData] = useState<EmployerJobFormData>({
     title: '',
     positionsCount: 1,
     jobDescription: '',
-    profileDescription: '',
+    requirements: '',
+    location: 'Dakar',
+    salaryMin: 0,
+    salaryMax: 0,
+    workMode: 'ON_SITE',
     experienceLevel: 'ENTRY',
-    requiredLanguages: [],
     educationLevel: 'NONE',
     contractType: 'FULL_TIME',
-    salaryAmount: 0,
     salaryCurrency: 'XOF',
+    skills: [],
   });
 
-  const [languageInput, setLanguageInput] = useState('');
+  const [skillInput, setSkillInput] = useState('');
 
   const getErrorMessage = (err: unknown, fallback: string): string => {
     if (err instanceof Error && err.message) return err.message;
@@ -62,7 +111,7 @@ const EmployerDashboard = () => {
       const data = await applicationApi.getMyEmployerApplications();
       setEmployerApplications(data);
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Erreur lors du chargement des candidatures'));
+      setError(getErrorMessage(err, isEn ? 'Error while loading applications' : 'Erreur lors du chargement des candidatures'));
     }
   }, []);
 
@@ -75,16 +124,39 @@ const EmployerDashboard = () => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
+
+    if (formData.salaryMax < formData.salaryMin) {
+      setError(isEn ? 'Invalid salary range (max < min).' : 'La fourchette salariale est invalide (max < min).');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const newJob = await employerJobApi.createJob(formData);
+      const payload: JobCreateRequest = {
+        title: formData.title,
+        positionsCount: formData.positionsCount,
+        jobDescription: formData.jobDescription,
+        profileDescription: formData.requirements,
+        experienceLevel: formData.experienceLevel,
+        requiredLanguages: [],
+        requiredSkills: formData.skills,
+        educationLevel: formData.educationLevel,
+        contractType: formData.contractType,
+        salaryMin: formData.salaryMin,
+        salaryMax: formData.salaryMax,
+        salaryCurrency: formData.salaryCurrency,
+        location: formData.location,
+        remoteWorkType: formData.workMode,
+      };
+
+      const newJob = await employerJobApi.createJob(payload);
       setJobs([newJob, ...jobs]);
-      setSuccess('Offre créée avec succès en mode brouillon');
+      setSuccess(isEn ? 'Job offer created as draft' : 'Offre créée avec succès en mode brouillon');
       setShowForm(false);
       resetForm();
     } catch (err: unknown) {
-      setError(getErrorMessage(err, "Erreur lors de la création de l'offre"));
+      setError(getErrorMessage(err, isEn ? 'Error while creating job offer' : "Erreur lors de la création de l'offre"));
     } finally {
       setLoading(false);
     }
@@ -94,9 +166,9 @@ const EmployerDashboard = () => {
     try {
       const updatedJob = await employerJobApi.publishJob(jobId);
       setJobs(jobs.map((j) => (j.id === jobId ? updatedJob : j)));
-      setSuccess('Offre publiée avec succès');
+      setSuccess(isEn ? 'Job offer published successfully' : 'Offre publiée avec succès');
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Erreur lors de la publication'));
+      setError(getErrorMessage(err, isEn ? 'Error while publishing' : 'Erreur lors de la publication'));
     }
   };
 
@@ -105,31 +177,35 @@ const EmployerDashboard = () => {
       title: '',
       positionsCount: 1,
       jobDescription: '',
-      profileDescription: '',
+      requirements: '',
+      location: 'Dakar',
+      salaryMin: 0,
+      salaryMax: 0,
+      workMode: 'ON_SITE',
       experienceLevel: 'ENTRY',
-      requiredLanguages: [],
       educationLevel: 'NONE',
       contractType: 'FULL_TIME',
-      salaryAmount: 0,
       salaryCurrency: 'XOF',
+      skills: [],
     });
-    setLanguageInput('');
+    setSkillInput('');
   };
 
-  const addLanguage = () => {
-    if (languageInput && !formData.requiredLanguages.includes(languageInput)) {
+  const addSkill = () => {
+    const normalized = skillInput.trim();
+    if (normalized && !formData.skills.includes(normalized)) {
       setFormData({
         ...formData,
-        requiredLanguages: [...formData.requiredLanguages, languageInput],
+        skills: [...formData.skills, normalized],
       });
-      setLanguageInput('');
+      setSkillInput('');
     }
   };
 
-  const removeLanguage = (lang: string) => {
+  const removeSkill = (skill: string) => {
     setFormData({
       ...formData,
-      requiredLanguages: formData.requiredLanguages.filter((l) => l !== lang),
+      skills: formData.skills.filter((item) => item !== skill),
     });
   };
 
@@ -140,7 +216,7 @@ const EmployerDashboard = () => {
       const details = await employerJobApi.getJobDetails(jobId);
       setSelectedJob(details);
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Erreur lors du chargement des détails'));
+      setError(getErrorMessage(err, isEn ? 'Error while loading details' : 'Erreur lors du chargement des détails'));
     } finally {
       setLoadingDetails(false);
     }
@@ -149,11 +225,11 @@ const EmployerDashboard = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'DRAFT':
-        return <span className="badge badge-secondary">Brouillon</span>;
+        return <span className="badge badge-secondary">{isEn ? 'Draft' : 'Brouillon'}</span>;
       case 'PUBLISHED':
-        return <span className="badge badge-success">Publié</span>;
+        return <span className="badge badge-success">{isEn ? 'Published' : 'Publié'}</span>;
       case 'ARCHIVED':
-        return <span className="badge badge-warning">Archivé</span>;
+        return <span className="badge badge-warning">{isEn ? 'Archived' : 'Archivé'}</span>;
       default:
         return null;
     }
@@ -171,8 +247,8 @@ const EmployerDashboard = () => {
     <div className="dashboard">
       <div className="dashboard-header">
         <div className="container">
-          <h1>Espace employeur</h1>
-          <p>Bienvenue, {user?.name}</p>
+          <h1>{isEn ? 'Employer space' : 'Espace employeur'}</h1>
+          <p>{isEn ? 'Welcome' : 'Bienvenue'}, {user?.name}</p>
         </div>
       </div>
 
@@ -196,7 +272,7 @@ const EmployerDashboard = () => {
               <Briefcase size={32} />
               <div>
                 <h3>{activeJobs.length}</h3>
-                <p>Offres actives</p>
+                <p>{isEn ? 'Active jobs' : 'Offres actives'}</p>
               </div>
             </div>
 
@@ -204,7 +280,7 @@ const EmployerDashboard = () => {
               <Users size={32} />
               <div>
                 <h3>{totalApplications}</h3>
-                <p>Nombre de candidatures</p>
+                <p>{isEn ? 'Applications' : 'Nombre de candidatures'}</p>
               </div>
             </div>
 
@@ -212,32 +288,32 @@ const EmployerDashboard = () => {
               <FileText size={32} />
               <div>
                 <h3>{employerApplications.filter((app) => app.status === 'HIRED' || app.status === 'ACCEPTED').length}</h3>
-                <p>Candidats embauchés</p>
+                <p>{isEn ? 'Hired candidates' : 'Candidats embauchés'}</p>
               </div>
             </div>
           </div>
 
           <div className="dashboard-section">
             <div className="section-header">
-              <h2>Tableau de bord employeur</h2>
+              <h2>{isEn ? 'Employer dashboard' : 'Tableau de bord employeur'}</h2>
               <div className="job-actions">
                 <Link className="btn btn-outline" to="/employer/applications">
-                  Gérer les candidatures
+                  {isEn ? 'Manage applications' : 'Gérer les candidatures'}
                 </Link>
                 <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
                   <PlusCircle size={18} />
-                  Publier une offre d&apos;emploi
+                  {isEn ? 'Post a job offer' : 'Publier une offre d&apos;emploi'}
                 </button>
               </div>
             </div>
 
             {showForm && (
               <div className="job-form">
-                <h3>Nouvelle offre d'emploi</h3>
+                <h3>{isEn ? 'New job offer' : "Nouvelle offre d'emploi"}</h3>
                 <form onSubmit={handleSubmit}>
                   <div className="form-row">
                     <div className="form-group">
-                      <label>Titre du poste *</label>
+                      <label>{isEn ? 'Job title *' : 'Titre du poste *'}</label>
                       <input
                         type="text"
                         className="form-control"
@@ -249,7 +325,7 @@ const EmployerDashboard = () => {
                     </div>
 
                     <div className="form-group">
-                      <label>Nombre de postes *</label>
+                      <label>{isEn ? 'Number of openings *' : 'Nombre de postes *'}</label>
                       <input
                         type="number"
                         className="form-control"
@@ -263,32 +339,62 @@ const EmployerDashboard = () => {
                   </div>
 
                   <div className="form-group">
-                    <label>Description du poste *</label>
+                    <label>{isEn ? 'Job description *' : 'Description du poste *'}</label>
                     <textarea
                       className="form-control"
                       rows={4}
                       value={formData.jobDescription}
                       onChange={(e) => setFormData({ ...formData, jobDescription: e.target.value })}
-                      placeholder="Décrivez les responsabilités et missions du poste..."
+                      placeholder={isEn ? 'Describe responsibilities and missions...' : 'Décrivez les responsabilités et missions du poste...'}
                       required
                     />
                   </div>
 
                   <div className="form-group">
-                    <label>Description du profil recherché *</label>
+                    <label>{isEn ? 'Requirements *' : 'Exigences *'}</label>
                     <textarea
                       className="form-control"
                       rows={4}
-                      value={formData.profileDescription}
-                      onChange={(e) => setFormData({ ...formData, profileDescription: e.target.value })}
-                      placeholder="Décrivez le profil idéal du candidat..."
+                      value={formData.requirements}
+                      onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
+                      placeholder={isEn ? 'Ex: 3 years of experience, React, communication...' : 'Ex: 3 ans d\'experience, maitrise de React, communication...'}
                       required
                     />
                   </div>
 
                   <div className="form-row">
                     <div className="form-group">
-                      <label>Niveau d'expérience *</label>
+                      <label>{isEn ? 'Location *' : 'Localisation *'}</label>
+                      <select
+                        className="form-control"
+                        value={formData.location}
+                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                        required
+                      >
+                        {SENEGAL_REGIONS.map((region) => (
+                          <option key={region} value={region}>
+                            {region}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>{isEn ? 'Work mode *' : 'Type de travail *'}</label>
+                      <select
+                        className="form-control"
+                        value={formData.workMode}
+                        onChange={(e) => setFormData({ ...formData, workMode: e.target.value as WorkMode })}
+                      >
+                        <option value="ON_SITE">{isEn ? 'On-site' : 'Sur site'}</option>
+                        <option value="HYBRID">{isEn ? 'Hybrid' : 'Hybride'}</option>
+                        <option value="REMOTE">{isEn ? 'Remote' : 'Teletravail'}</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>{isEn ? 'Experience level *' : 'Niveau d\'expérience *'}</label>
                       <select
                         className="form-control"
                         value={formData.experienceLevel}
@@ -296,50 +402,50 @@ const EmployerDashboard = () => {
                           setFormData({ ...formData, experienceLevel: e.target.value as ExperienceLevel })
                         }
                       >
-                        <option value="ENTRY">Débutant (0-2 ans)</option>
-                        <option value="MID">Intermédiaire (2-5 ans)</option>
-                        <option value="SENIOR">Senior (5-10 ans)</option>
+                        <option value="ENTRY">{isEn ? 'Entry (0-2 years)' : 'Débutant (0-2 ans)'}</option>
+                        <option value="MID">{isEn ? 'Mid (2-5 years)' : 'Intermédiaire (2-5 ans)'}</option>
+                        <option value="SENIOR">{isEn ? 'Senior (5-10 years)' : 'Senior (5-10 ans)'}</option>
                         <option value="LEAD">Lead (10+ ans)</option>
                       </select>
                     </div>
 
                     <div className="form-group">
-                      <label>Niveau d'études requis *</label>
+                      <label>{isEn ? 'Education level *' : 'Niveau d\'études requis *'}</label>
                       <select
                         className="form-control"
                         value={formData.educationLevel}
                         onChange={(e) => setFormData({ ...formData, educationLevel: e.target.value as EducationLevel })}
                       >
-                        <option value="NONE">Aucun diplôme requis</option>
-                        <option value="HIGH_SCHOOL">Bac</option>
-                        <option value="BACHELOR">Licence</option>
+                        <option value="NONE">{isEn ? 'No degree required' : 'Aucun diplôme requis'}</option>
+                        <option value="HIGH_SCHOOL">{isEn ? 'High school' : 'Bac'}</option>
+                        <option value="BACHELOR">{isEn ? 'Bachelor' : 'Licence'}</option>
                         <option value="MASTER">Master</option>
-                        <option value="DOCTORATE">Doctorat</option>
-                        <option value="OTHER">Autre</option>
+                        <option value="DOCTORATE">{isEn ? 'PhD' : 'Doctorat'}</option>
+                        <option value="OTHER">{isEn ? 'Other' : 'Autre'}</option>
                       </select>
                     </div>
                   </div>
 
                   <div className="form-group">
-                    <label>Langues requises (ex: fr, en, ar)</label>
+                    <label>{isEn ? 'Required skills' : 'Competences requises'}</label>
                     <div className="language-input">
                       <input
                         type="text"
                         className="form-control"
-                        value={languageInput}
-                        onChange={(e) => setLanguageInput(e.target.value.toLowerCase())}
-                        placeholder="Ajouter une langue (code ISO)"
-                        maxLength={5}
+                        value={skillInput}
+                        onChange={(e) => setSkillInput(e.target.value)}
+                        placeholder={isEn ? 'Add a skill' : 'Ajouter une competence'}
+                        maxLength={60}
                       />
-                      <button type="button" className="btn btn-sm btn-outline" onClick={addLanguage}>
-                        Ajouter
+                      <button type="button" className="btn btn-sm btn-outline" onClick={addSkill}>
+                        {isEn ? 'Add' : 'Ajouter'}
                       </button>
                     </div>
                     <div className="language-tags">
-                      {formData.requiredLanguages.map((lang) => (
-                        <span key={lang} className="tag">
-                          {lang}
-                          <button type="button" onClick={() => removeLanguage(lang)}>
+                      {formData.skills.map((skill) => (
+                        <span key={skill} className="tag">
+                          {skill}
+                          <button type="button" onClick={() => removeSkill(skill)}>
                             ×
                           </button>
                         </span>
@@ -349,22 +455,22 @@ const EmployerDashboard = () => {
 
                   <div className="form-row">
                     <div className="form-group">
-                      <label>Type de contrat *</label>
+                      <label>{isEn ? 'Contract type *' : 'Type de contrat *'}</label>
                       <select
                         className="form-control"
                         value={formData.contractType}
                         onChange={(e) => setFormData({ ...formData, contractType: e.target.value as JobContractType })}
                       >
-                        <option value="FULL_TIME">Temps plein</option>
-                        <option value="PART_TIME">Temps partiel</option>
-                        <option value="CONTRACT">Contrat</option>
-                        <option value="INTERNSHIP">Stage</option>
-                        <option value="TEMPORARY">Temporaire</option>
+                        <option value="FULL_TIME">{isEn ? 'Full time' : 'Temps plein'}</option>
+                        <option value="PART_TIME">{isEn ? 'Part time' : 'Temps partiel'}</option>
+                        <option value="CONTRACT">{isEn ? 'Contract' : 'Contrat'}</option>
+                        <option value="INTERNSHIP">{isEn ? 'Internship' : 'Stage'}</option>
+                        <option value="TEMPORARY">{isEn ? 'Temporary' : 'Temporaire'}</option>
                       </select>
                     </div>
 
                     <div className="form-group">
-                      <label>Devise *</label>
+                      <label>{isEn ? 'Currency *' : 'Devise *'}</label>
                       <select
                         className="form-control"
                         value={formData.salaryCurrency}
@@ -377,25 +483,39 @@ const EmployerDashboard = () => {
                     </div>
                   </div>
 
-                  <div className="form-group">
-                    <label>Salaire proposé *</label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      value={formData.salaryAmount}
-                      onChange={(e) => setFormData({ ...formData, salaryAmount: parseFloat(e.target.value) })}
-                      min="0"
-                      step="0.01"
-                      required
-                    />
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>{isEn ? 'Minimum salary *' : 'Fourchette salariale min *'}</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={formData.salaryMin}
+                        onChange={(e) => setFormData({ ...formData, salaryMin: parseFloat(e.target.value) || 0 })}
+                        min="0"
+                        step="0.01"
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>{isEn ? 'Maximum salary *' : 'Fourchette salariale max *'}</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={formData.salaryMax}
+                        onChange={(e) => setFormData({ ...formData, salaryMax: parseFloat(e.target.value) || 0 })}
+                        min={formData.salaryMin}
+                        step="0.01"
+                        required
+                      />
+                    </div>
                   </div>
 
                   <div className="form-actions">
                     <button type="button" className="btn btn-outline" onClick={() => setShowForm(false)}>
-                      Annuler
+                      {isEn ? 'Cancel' : 'Annuler'}
                     </button>
                     <button type="submit" className="btn btn-primary" disabled={loading}>
-                      {loading ? 'Création...' : 'Créer le brouillon'}
+                      {loading ? (isEn ? 'Creating...' : 'Création...') : (isEn ? 'Create draft' : 'Créer le brouillon')}
                     </button>
                   </div>
                 </form>
@@ -403,20 +523,20 @@ const EmployerDashboard = () => {
             )}
 
             <div className="dashboard-subsection">
-              <h3>Tableau des offres actives</h3>
+              <h3>{isEn ? 'Active job offers' : 'Tableau des offres actives'}</h3>
               {activeJobs.length === 0 ? (
-                <p className="empty-state">Aucune offre active pour le moment</p>
+                <p className="empty-state">{isEn ? 'No active job offers yet' : 'Aucune offre active pour le moment'}</p>
               ) : (
                 <div className="dashboard-table-wrapper">
                   <table className="dashboard-table">
                     <thead>
                       <tr>
-                        <th>Offre</th>
-                        <th>Entreprise</th>
-                        <th>Date de publication</th>
-                        <th>Candidatures</th>
-                        <th>Statut</th>
-                        <th>Action</th>
+                        <th>{isEn ? 'Offer' : 'Offre'}</th>
+                        <th>{isEn ? 'Company' : 'Entreprise'}</th>
+                        <th>{isEn ? 'Published date' : 'Date de publication'}</th>
+                        <th>{isEn ? 'Applications' : 'Candidatures'}</th>
+                        <th>{isEn ? 'Status' : 'Statut'}</th>
+                        <th>{isEn ? 'Action' : 'Action'}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -430,14 +550,14 @@ const EmployerDashboard = () => {
                           <td>
                             <div className="job-actions">
                               <Link className="btn btn-sm btn-outline" to={`/employer/applications?jobId=${job.id}`}>
-                                Voir candidats
+                                {isEn ? 'View candidates' : 'Voir candidats'}
                               </Link>
                               <button
                                 className="btn btn-sm btn-outline"
                                 onClick={() => handleViewDetails(job.id)}
                                 disabled={loadingDetails}
                               >
-                                {loadingDetails ? 'Chargement...' : 'Voir'}
+                                {loadingDetails ? (isEn ? 'Loading...' : 'Chargement...') : (isEn ? 'View' : 'Voir')}
                               </button>
                             </div>
                           </td>
@@ -474,9 +594,9 @@ const EmployerDashboard = () => {
             </div>
 
             <div className="dashboard-subsection">
-              <h3>Brouillons à publier</h3>
+              <h3>{isEn ? 'Drafts to publish' : 'Brouillons à publier'}</h3>
               {drafts.length === 0 ? (
-                <p className="empty-state">Aucun brouillon en attente.</p>
+                <p className="empty-state">{isEn ? 'No pending drafts.' : 'Aucun brouillon en attente.'}</p>
               ) : (
                 <div className="jobs-list">
                   {drafts.map((job) => (
@@ -489,14 +609,14 @@ const EmployerDashboard = () => {
                         {getStatusBadge(job.status)}
                         <button className="btn btn-sm btn-primary" onClick={() => handlePublish(job.id)}>
                           <Send size={14} />
-                          Publier
+                          {isEn ? 'Publish' : 'Publier'}
                         </button>
                         <button
                           className="btn btn-sm btn-outline"
                           onClick={() => handleViewDetails(job.id)}
                           disabled={loadingDetails}
                         >
-                          {loadingDetails ? 'Chargement...' : 'Voir'}
+                          {loadingDetails ? (isEn ? 'Loading...' : 'Chargement...') : (isEn ? 'View' : 'Voir')}
                         </button>
                       </div>
                     </div>
@@ -507,17 +627,17 @@ const EmployerDashboard = () => {
           </div>
 
           <div className="dashboard-section">
-            <h2>Profil</h2>
+            <h2>{isEn ? 'Profile' : 'Profil'}</h2>
             <div className="profile-card">
               <div className="profile-info">
                 <h3>{user?.name}</h3>
                 <p>{user?.email}</p>
               </div>
               <div className="profile-actions">
-                <button className="btn btn-outline">Modifier le profil</button>
+                <button className="btn btn-outline">{isEn ? 'Edit profile' : 'Modifier le profil'}</button>
                 <button className="btn btn-outline" onClick={() => setShowPasswordForm(!showPasswordForm)}>
                   <Lock size={18} />
-                  {showPasswordForm ? 'Masquer' : 'Changer le mot de passe'}
+                  {showPasswordForm ? (isEn ? 'Hide' : 'Masquer') : (isEn ? 'Change password' : 'Changer le mot de passe')}
                 </button>
               </div>
             </div>

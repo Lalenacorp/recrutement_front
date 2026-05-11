@@ -14,36 +14,41 @@ import type {
 import { applicationApi } from '../api/applicationApi';
 import { jobMatchingApi } from '../api/jobMatchingApi';
 import ChangePasswordForm from '../components/ChangePasswordForm';
-
-const EXPERIENCE_OPTIONS: { value: ExperienceLevel; label: string }[] = [
-  { value: 'ENTRY', label: 'Débutant (0–2 ans)' },
-  { value: 'MID', label: 'Confirmé (2–5 ans)' },
-  { value: 'SENIOR', label: 'Senior (5–10 ans)' },
-  { value: 'LEAD', label: 'Lead / 10+ ans' },
-];
-
-const EDUCATION_OPTIONS: { value: EducationLevel; label: string }[] = [
-  { value: 'NONE', label: 'Sans diplôme exigé' },
-  { value: 'HIGH_SCHOOL', label: 'Bac' },
-  { value: 'BACHELOR', label: 'Licence / Bachelor' },
-  { value: 'MASTER', label: 'Master' },
-  { value: 'DOCTORATE', label: 'Doctorat' },
-  { value: 'OTHER', label: 'Autre' },
-];
-
-const CONTRACT_OPTIONS: { value: JobContractType; label: string }[] = [
-  { value: 'FULL_TIME', label: 'Temps plein' },
-  { value: 'PART_TIME', label: 'Temps partiel' },
-  { value: 'CONTRACT', label: 'CDD / contrat' },
-  { value: 'INTERNSHIP', label: 'Stage' },
-  { value: 'TEMPORARY', label: 'Intérim / temporaire' },
-];
-
-function contractLabel(t: JobContractType): string {
-  return CONTRACT_OPTIONS.find((o) => o.value === t)?.label ?? t;
-}
+import { useLanguage } from '../context/LanguageContext';
+import { translateJobTitle } from '../utils/jobTitleTranslation';
+import { useSEO } from '../utils/useSEO';
 
 const CandidateDashboard = () => {
+  useSEO({
+    title: 'Espace candidat',
+    description: 'Tableau de bord candidat SNJobConnect — suivez vos candidatures, gérez votre CV et trouvez les offres adaptées à votre profil.',
+    path: '/candidate/dashboard',
+    noIndex: true,
+  });
+  const { language } = useLanguage();
+  const isEn = language === 'en';
+  const EXPERIENCE_OPTIONS: { value: ExperienceLevel; label: string }[] = [
+    { value: 'ENTRY', label: isEn ? 'Entry (0-2 years)' : 'Débutant (0–2 ans)' },
+    { value: 'MID', label: isEn ? 'Mid (2-5 years)' : 'Confirmé (2–5 ans)' },
+    { value: 'SENIOR', label: isEn ? 'Senior (5-10 years)' : 'Senior (5–10 ans)' },
+    { value: 'LEAD', label: isEn ? 'Lead / 10+ years' : 'Lead / 10+ ans' },
+  ];
+  const EDUCATION_OPTIONS: { value: EducationLevel; label: string }[] = [
+    { value: 'NONE', label: isEn ? 'No degree required' : 'Sans diplôme exigé' },
+    { value: 'HIGH_SCHOOL', label: isEn ? 'High school' : 'Bac' },
+    { value: 'BACHELOR', label: isEn ? 'Bachelor' : 'Licence / Bachelor' },
+    { value: 'MASTER', label: 'Master' },
+    { value: 'DOCTORATE', label: isEn ? 'PhD' : 'Doctorat' },
+    { value: 'OTHER', label: isEn ? 'Other' : 'Autre' },
+  ];
+  const CONTRACT_OPTIONS: { value: JobContractType; label: string }[] = [
+    { value: 'FULL_TIME', label: isEn ? 'Full time' : 'Temps plein' },
+    { value: 'PART_TIME', label: isEn ? 'Part time' : 'Temps partiel' },
+    { value: 'CONTRACT', label: isEn ? 'Contract' : 'CDD / contrat' },
+    { value: 'INTERNSHIP', label: isEn ? 'Internship' : 'Stage' },
+    { value: 'TEMPORARY', label: isEn ? 'Temporary' : 'Intérim / temporaire' },
+  ];
+  const contractLabel = (t: JobContractType): string => CONTRACT_OPTIONS.find((o) => o.value === t)?.label ?? t;
   const { user } = useAuth();
   const [applications, setApplications] = useState<ApplicationResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -92,7 +97,7 @@ const CandidateDashboard = () => {
       });
       setMatches(list);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Erreur lors du chargement du matching';
+      const msg = err instanceof Error ? err.message : (isEn ? 'Error while loading matching' : 'Erreur lors du chargement du matching');
       setMatchError(msg);
     } finally {
       setMatchLoading(false);
@@ -114,7 +119,7 @@ const CandidateDashboard = () => {
       const data = await applicationApi.getMyCandidateApplications();
       setApplications(data);
     } catch (err: any) {
-      setError(err.message || 'Erreur lors du chargement des candidatures');
+      setError(err.message || (isEn ? 'Error while loading applications' : 'Erreur lors du chargement des candidatures'));
       console.error('Erreur:', err);
     } finally {
       setLoading(false);
@@ -152,7 +157,7 @@ const CandidateDashboard = () => {
       const list = await jobMatchingApi.getJobMatches();
       setMatches(list);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Erreur lors de l’enregistrement';
+      const msg = err instanceof Error ? err.message : (isEn ? 'Error while saving' : 'Erreur lors de l’enregistrement');
       setMatchError(msg);
     } finally {
       setProfileSaving(false);
@@ -183,7 +188,7 @@ const CandidateDashboard = () => {
 
   const runCvOptimization = async (jobId: number) => {
     if (!cvSourceText.trim()) {
-      setCvOptimizeError('Collez le texte actuel de votre CV avant de lancer l’optimisation.');
+      setCvOptimizeError(isEn ? 'Paste your current CV text before optimization.' : 'Collez le texte actuel de votre CV avant de lancer l’optimisation.');
       return;
     }
     try {
@@ -192,7 +197,7 @@ const CandidateDashboard = () => {
       const result = await jobMatchingApi.optimizeCvForJob(jobId, cvSourceText);
       setCvOptimizeResult(result);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Erreur pendant l’optimisation IA';
+      const msg = err instanceof Error ? err.message : (isEn ? 'Error during AI optimization' : 'Erreur pendant l’optimisation IA');
       setCvOptimizeError(msg);
     } finally {
       setCvOptimizing(false);
@@ -202,15 +207,15 @@ const CandidateDashboard = () => {
   const getStatusText = (status: ApplicationStatus) => {
     switch (status) {
       case 'SUBMITTED':
-        return 'En attente';
+        return isEn ? 'Pending' : 'En attente';
       case 'REVIEWED':
-        return 'Examinée';
+        return isEn ? 'Reviewed' : 'Examinée';
       case 'ACCEPTED':
-        return 'Acceptée';
+        return isEn ? 'Accepted' : 'Acceptée';
       case 'REJECTED':
-        return 'Refusée';
+        return isEn ? 'Rejected' : 'Refusée';
       case 'WITHDRAWN':
-        return 'Retirée';
+        return isEn ? 'Withdrawn' : 'Retirée';
     }
   };
 
@@ -218,8 +223,8 @@ const CandidateDashboard = () => {
     <div className="dashboard">
       <div className="dashboard-header">
         <div className="container">
-          <h1>Mon espace candidat</h1>
-          <p>Bienvenue, {user?.name}</p>
+          <h1>{isEn ? 'My candidate space' : 'Mon espace candidat'}</h1>
+          <p>{isEn ? 'Welcome' : 'Bienvenue'}, {user?.name}</p>
         </div>
       </div>
       
@@ -229,21 +234,22 @@ const CandidateDashboard = () => {
                 <div className="section-header">
                   <h2>
                     <Sparkles size={28} className="matching-section-icon" aria-hidden />
-                    Offres pour vous
+                    {isEn ? 'Recommended jobs' : 'Offres pour vous'}
                   </h2>
                 </div>
                 {!profileComplete && (
                   <p className="matching-hint">
-                    Renseignez au minimum votre expérience et votre formation ci-dessous pour des scores de
-                    correspondance plus fiables.
+                    {isEn
+                      ? 'Fill at least your experience and education below for better matching scores.'
+                      : 'Renseignez au minimum votre expérience et votre formation ci-dessous pour des scores de correspondance plus fiables.'}
                   </p>
                 )}
 
                 <form className="matching-profile-form" onSubmit={saveMatchingProfile}>
-                  <h3 className="matching-subtitle">Profil de matching</h3>
+                  <h3 className="matching-subtitle">{isEn ? 'Matching profile' : 'Profil de matching'}</h3>
                   <div className="matching-form-grid">
                     <label className="matching-field">
-                      <span>Niveau d&apos;expérience</span>
+                      <span>{isEn ? 'Experience level' : 'Niveau d&apos;expérience'}</span>
                       <select
                         value={profileForm.experience}
                         onChange={(ev) =>
@@ -253,7 +259,7 @@ const CandidateDashboard = () => {
                           }))
                         }
                       >
-                        <option value="">— Non renseigné —</option>
+                        <option value="">{isEn ? '— Not specified —' : '— Non renseigné —'}</option>
                         {EXPERIENCE_OPTIONS.map((o) => (
                           <option key={o.value} value={o.value}>
                             {o.label}
@@ -262,7 +268,7 @@ const CandidateDashboard = () => {
                       </select>
                     </label>
                     <label className="matching-field">
-                      <span>Formation</span>
+                      <span>{isEn ? 'Education' : 'Formation'}</span>
                       <select
                         value={profileForm.education}
                         onChange={(ev) =>
@@ -272,7 +278,7 @@ const CandidateDashboard = () => {
                           }))
                         }
                       >
-                        <option value="">— Non renseigné —</option>
+                        <option value="">{isEn ? '— Not specified —' : '— Non renseigné —'}</option>
                         {EDUCATION_OPTIONS.map((o) => (
                           <option key={o.value} value={o.value}>
                             {o.label}
@@ -282,7 +288,7 @@ const CandidateDashboard = () => {
                     </label>
                   </div>
                   <fieldset className="matching-contracts">
-                    <legend>Types de contrat recherchés</legend>
+                    <legend>{isEn ? 'Preferred contract types' : 'Types de contrat recherchés'}</legend>
                     <div className="matching-contract-chips">
                       {CONTRACT_OPTIONS.map((o) => (
                         <label key={o.value} className="matching-chip">
@@ -297,28 +303,28 @@ const CandidateDashboard = () => {
                     </div>
                   </fieldset>
                   <label className="matching-field matching-keywords">
-                    <span>Mots-clés (compétences, secteurs…)</span>
+                    <span>{isEn ? 'Keywords (skills, sectors...)' : 'Mots-clés (compétences, secteurs…)'}</span>
                     <textarea
                       rows={3}
                       maxLength={500}
-                      placeholder="ex. Java, commercial, logistique"
+                      placeholder={isEn ? 'e.g. Java, sales, logistics' : 'ex. Java, commercial, logistique'}
                       value={profileForm.keywords}
                       onChange={(ev) => setProfileForm((p) => ({ ...p, keywords: ev.target.value }))}
                     />
                   </label>
                   <label className="matching-field matching-keywords">
-                    <span>Contenu CV pour le matching</span>
+                    <span>{isEn ? 'CV content for matching' : 'Contenu CV pour le matching'}</span>
                     <textarea
                       rows={7}
                       maxLength={20000}
-                      placeholder="Collez ici le texte de votre CV pour comparer avec les descriptions des offres"
+                      placeholder={isEn ? 'Paste your CV text to compare with job descriptions' : 'Collez ici le texte de votre CV pour comparer avec les descriptions des offres'}
                       value={profileForm.cvTextForMatching}
                       onChange={(ev) => setProfileForm((p) => ({ ...p, cvTextForMatching: ev.target.value }))}
                     />
                   </label>
                   <div className="matching-form-actions">
                     <button type="submit" className="btn btn-primary" disabled={profileSaving}>
-                      {profileSaving ? 'Enregistrement…' : 'Enregistrer et actualiser les offres'}
+                      {profileSaving ? (isEn ? 'Saving...' : 'Enregistrement…') : (isEn ? 'Save and refresh offers' : 'Enregistrer et actualiser les offres')}
                     </button>
                   </div>
                 </form>
@@ -327,7 +333,7 @@ const CandidateDashboard = () => {
                   <div className="error-message matching-error">
                     <p>{matchError}</p>
                     <button type="button" className="btn btn-primary" onClick={() => loadMatching()}>
-                      Réessayer
+                      {isEn ? 'Retry' : 'Réessayer'}
                     </button>
                   </div>
                 )}
@@ -335,14 +341,14 @@ const CandidateDashboard = () => {
                 {matchLoading && !matchError ? (
                   <div className="loading-message matching-loading">
                     <div className="spinner" />
-                    <p>Chargement des recommandations…</p>
+                    <p>{isEn ? 'Loading recommendations...' : 'Chargement des recommandations…'}</p>
                   </div>
                 ) : !matchError && matches.length === 0 ? (
                   <div className="empty-state matching-empty">
                     <Briefcase size={48} />
-                    <p>Aucune offre à vous proposer pour le moment (ou vous avez déjà postulé partout).</p>
+                    <p>{isEn ? 'No recommendations for now (or you already applied everywhere).' : 'Aucune offre à vous proposer pour le moment (ou vous avez déjà postulé partout).'}</p>
                     <Link to="/jobs" className="btn btn-primary">
-                      Voir toutes les offres
+                      {isEn ? 'See all jobs' : 'Voir toutes les offres'}
                     </Link>
                   </div>
                 ) : !matchError ? (
@@ -351,7 +357,7 @@ const CandidateDashboard = () => {
                       <li key={m.jobId} className="job-match-card">
                         <div className="job-match-card-top">
                           <div>
-                            <h3>{m.title}</h3>
+                            <h3>{translateJobTitle(m.title, language)}</h3>
                             <p className="job-match-company">{m.companyName}</p>
                           </div>
                           <span className="match-score-pill" title="Correspondance estimée">
@@ -359,10 +365,10 @@ const CandidateDashboard = () => {
                           </span>
                         </div>
                         <p className="job-match-meta">
-                          {contractLabel(m.contractType)} · {m.salaryAmount.toLocaleString('fr-FR')}{' '}
-                          {m.salaryCurrency}
+                          {contractLabel(m.contractType)} · {m.salaryMin.toLocaleString(isEn ? 'en-US' : 'fr-FR')} -{' '}
+                          {m.salaryMax.toLocaleString(isEn ? 'en-US' : 'fr-FR')} {m.salaryCurrency}
                           {m.publishedAt
-                            ? ` · Publiée le ${new Date(m.publishedAt).toLocaleDateString('fr-FR')}`
+                            ? ` · ${isEn ? 'Published on' : 'Publiée le'} ${new Date(m.publishedAt).toLocaleDateString(isEn ? 'en-US' : 'fr-FR')}`
                             : ''}
                         </p>
                         {m.matchHighlights.length > 0 && (
@@ -373,31 +379,32 @@ const CandidateDashboard = () => {
                           </ul>
                         )}
                         <Link to={`/jobs/${m.jobId}`} className="btn btn-outline job-match-cta">
-                          Voir l&apos;offre
+                          {isEn ? 'View offer' : 'Voir l&apos;offre'}
                         </Link>
                         <button
                           type="button"
                           className="btn btn-primary job-match-cta"
                           onClick={() => openCvOptimizer(m.jobId)}
                         >
-                          Optimiser mon CV avec IA
+                          {isEn ? 'Optimize my CV with AI' : 'Optimiser mon CV avec IA'}
                         </button>
 
                         {cvOptimizerOpenForJobId === m.jobId && (
                           <div className="cv-optimizer-panel">
-                            <h4>Optimisation IA pour {m.title}</h4>
+                            <h4>{isEn ? 'AI optimization for' : 'Optimisation IA pour'} {translateJobTitle(m.title, language)}</h4>
                             <p className="cv-optimizer-help">
-                              Collez votre CV actuel en texte. L&apos;outil propose une version optimisée pour
-                              cette offre.
+                              {isEn
+                                ? 'Paste your current CV text. The tool will suggest an optimized version for this job.'
+                                : 'Collez votre CV actuel en texte. L&apos;outil propose une version optimisée pour cette offre.'}
                             </p>
                             <label className="matching-field">
-                              <span>Mon CV actuel (texte)</span>
+                              <span>{isEn ? 'My current CV (text)' : 'Mon CV actuel (texte)'}</span>
                               <textarea
                                 rows={10}
                                 maxLength={20000}
                                 value={cvSourceText}
                                 onChange={(ev) => setCvSourceText(ev.target.value)}
-                                placeholder="Copiez-collez ici le contenu de votre CV"
+                                placeholder={isEn ? 'Paste your CV content here' : 'Copiez-collez ici le contenu de votre CV'}
                               />
                             </label>
                             <div className="cv-optimizer-actions">
@@ -407,10 +414,10 @@ const CandidateDashboard = () => {
                                 disabled={cvOptimizing}
                                 onClick={() => runCvOptimization(m.jobId)}
                               >
-                                {cvOptimizing ? 'Optimisation…' : 'Lancer l’optimisation'}
+                                {cvOptimizing ? (isEn ? 'Optimizing...' : 'Optimisation…') : (isEn ? 'Start optimization' : 'Lancer l’optimisation')}
                               </button>
                               <button type="button" className="btn btn-outline" onClick={closeCvOptimizer}>
-                                Fermer
+                                {isEn ? 'Close' : 'Fermer'}
                               </button>
                             </div>
 
@@ -419,7 +426,7 @@ const CandidateDashboard = () => {
                             {cvOptimizeResult && (
                               <div className="cv-optimizer-result">
                                 <label className="matching-field">
-                                  <span>CV optimisé</span>
+                                  <span>{isEn ? 'Optimized CV' : 'CV optimisé'}</span>
                                   <textarea readOnly rows={12} value={cvOptimizeResult.optimizedCvText} />
                                 </label>
                                 {cvOptimizeResult.keyImprovements.length > 0 && (
@@ -443,13 +450,13 @@ const CandidateDashboard = () => {
           {loading ? (
             <div className="loading-message">
               <div className="spinner"></div>
-              <p>Chargement de vos candidatures...</p>
+              <p>{isEn ? 'Loading your applications...' : 'Chargement de vos candidatures...'}</p>
             </div>
           ) : error ? (
             <div className="error-message">
               <p>{error}</p>
               <button className="btn btn-primary" onClick={loadApplications}>
-                Réessayer
+                {isEn ? 'Retry' : 'Réessayer'}
               </button>
             </div>
           ) : (
@@ -459,7 +466,7 @@ const CandidateDashboard = () => {
                   <Briefcase size={32} />
                   <div>
                     <h3>{applications.length}</h3>
-                    <p>Candidatures</p>
+                    <p>{isEn ? 'Applications' : 'Candidatures'}</p>
                   </div>
                 </div>
 
@@ -467,7 +474,7 @@ const CandidateDashboard = () => {
                   <Clock size={32} />
                   <div>
                     <h3>{applications.filter((a) => a.status === 'SUBMITTED').length}</h3>
-                    <p>En attente</p>
+                    <p>{isEn ? 'Pending' : 'En attente'}</p>
                   </div>
                 </div>
 
@@ -475,20 +482,20 @@ const CandidateDashboard = () => {
                   <CheckCircle size={32} />
                   <div>
                     <h3>{applications.filter((a) => a.status === 'ACCEPTED').length}</h3>
-                    <p>Acceptées</p>
+                    <p>{isEn ? 'Accepted' : 'Acceptées'}</p>
                   </div>
                 </div>
               </div>
 
               <div className="dashboard-section">
-                <h2>Mes candidatures</h2>
+                <h2>{isEn ? 'My applications' : 'Mes candidatures'}</h2>
                 
                 {applications.length === 0 ? (
                   <div className="empty-state">
                     <Briefcase size={48} />
-                    <p>Vous n'avez pas encore postulé à des offres</p>
+                    <p>{isEn ? "You haven't applied to any jobs yet" : "Vous n'avez pas encore postulé à des offres"}</p>
                     <a href="/jobs" className="btn btn-primary">
-                      Découvrir les offres
+                      {isEn ? 'Browse jobs' : 'Découvrir les offres'}
                     </a>
                   </div>
                 ) : (
@@ -498,7 +505,7 @@ const CandidateDashboard = () => {
                         <div className="application-header">
                           {getStatusIcon(app.status)}
                           <div>
-                            <h3>{app.jobTitle}</h3>
+                            <h3>{translateJobTitle(app.jobTitle, language)}</h3>
                             <p>{app.companyName}</p>
                           </div>
                         </div>
@@ -508,13 +515,13 @@ const CandidateDashboard = () => {
                             {getStatusText(app.status)}
                           </span>
                           <span className="application-date">
-                            Postulé le {new Date(app.createdAt).toLocaleDateString('fr-FR')}
+                            {isEn ? 'Applied on' : 'Postulé le'} {new Date(app.createdAt).toLocaleDateString(isEn ? 'en-US' : 'fr-FR')}
                           </span>
                         </div>
                         
                         {app.coverLetter && (
                           <div className="application-cover-letter">
-                            <strong>Lettre de motivation</strong>
+                            <strong>{isEn ? 'Cover letter' : 'Lettre de motivation'}</strong>
                             <p className="cover-letter-preview">{app.coverLetter}</p>
                           </div>
                         )}
@@ -523,7 +530,7 @@ const CandidateDashboard = () => {
                           <div className="application-cv">
                             <FileText size={16} />
                             <a href={app.cvUrl} target="_blank" rel="noopener noreferrer">
-                              Voir mon CV
+                              {isEn ? 'View my CV' : 'Voir mon CV'}
                             </a>
                           </div>
                         )}
@@ -536,20 +543,20 @@ const CandidateDashboard = () => {
           )}
 
           <div className="dashboard-section">
-            <h2>Profil</h2>
+            <h2>{isEn ? 'Profile' : 'Profil'}</h2>
             <div className="profile-card">
               <div className="profile-info">
                 <h3>{user?.name}</h3>
                 <p>{user?.email}</p>
               </div>
               <div className="profile-actions">
-                <button className="btn btn-outline">Modifier le profil</button>
+                <button className="btn btn-outline">{isEn ? 'Edit profile' : 'Modifier le profil'}</button>
                 <button 
                   className="btn btn-outline"
                   onClick={() => setShowPasswordForm(!showPasswordForm)}
                 >
                   <Lock size={18} />
-                  {showPasswordForm ? 'Masquer' : 'Changer le mot de passe'}
+                  {showPasswordForm ? (isEn ? 'Hide' : 'Masquer') : (isEn ? 'Change password' : 'Changer le mot de passe')}
                 </button>
               </div>
             </div>

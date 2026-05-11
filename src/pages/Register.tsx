@@ -3,10 +3,22 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Briefcase, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import EmailVerificationPending from './EmailVerificationPending';
+import { useLanguage } from '../context/LanguageContext';
+import { useSEO } from '../utils/useSEO';
 
 const PHONE_E164 = /^\+[1-9]\d{1,14}$/;
 
 const Register = () => {
+  const { language } = useLanguage();
+  const isEn = language === 'en';
+
+  useSEO({
+    title: isEn ? 'Candidate sign up' : 'Inscription candidat',
+    description: isEn
+      ? 'Create your free candidate account on SNJobConnect: apply for jobs, contests and training opportunities in Senegal.'
+      : "Créez votre compte candidat gratuit sur SNJobConnect : postulez aux offres d'emploi, concours et formations au Sénégal.",
+    path: '/register/candidat',
+  });
   const [step, setStep] = useState<1 | 2>(1);
   const [civility, setCivility] = useState<'MR' | 'MS' | 'MX'>('MR');
   const [firstName, setFirstName] = useState('');
@@ -24,11 +36,11 @@ const Register = () => {
 
   const validateStep1 = (): boolean => {
     if (!firstName.trim() || !lastName.trim()) {
-      setError('Veuillez renseigner votre prénom et votre nom');
+      setError(isEn ? 'Please enter your first and last name' : 'Veuillez renseigner votre prénom et votre nom');
       return false;
     }
     if (!PHONE_E164.test(phone.trim())) {
-      setError('Téléphone invalide. Format international requis (ex. +221701234567)');
+      setError(isEn ? 'Invalid phone. International format required (e.g. +221701234567)' : 'Téléphone invalide. Format international requis (ex. +221701234567)');
       return false;
     }
     return true;
@@ -49,12 +61,12 @@ const Register = () => {
     setError(null);
 
     if (email !== confirmEmail) {
-      setError('Les adresses email ne correspondent pas');
+      setError(isEn ? 'Email addresses do not match' : 'Les adresses email ne correspondent pas');
       return;
     }
 
     if (password.length < 6) {
-      setError('Le mot de passe doit contenir au moins 6 caractères');
+      setError(isEn ? 'Password must contain at least 6 characters' : 'Le mot de passe doit contenir au moins 6 caractères');
       return;
     }
 
@@ -78,7 +90,7 @@ const Register = () => {
         navigate('/candidate/dashboard');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors de l\'inscription');
+      setError(err instanceof Error ? err.message : (isEn ? 'Registration error' : 'Erreur lors de l\'inscription'));
     } finally {
       setLoading(false);
     }
@@ -94,25 +106,25 @@ const Register = () => {
       <div className="auth-container auth-container--register">
         <Link to="/register" className="register-profile-back">
           <ChevronLeft size={18} aria-hidden />
-          Choisir un autre profil
+          {isEn ? 'Choose another profile' : 'Choisir un autre profil'}
         </Link>
         <div className="auth-header auth-header--compact">
           <Briefcase size={36} />
-          <h2>Inscription Candidat</h2>
-          <p>Créez votre compte JobConnect</p>
+          <h2>{isEn ? 'Candidate sign up' : 'Inscription Candidat'}</h2>
+          <p>{isEn ? 'Create your SNJobConnect account' : 'Créez votre compte SNJobConnect'}</p>
         </div>
 
-        <div className="register-stepper" aria-label="Progression du formulaire">
+        <div className="register-stepper" aria-label={isEn ? 'Form progress' : 'Progression du formulaire'}>
           <div
             className={`register-stepper__segment ${step === 1 ? 'active' : ''} ${step === 2 ? 'done' : ''}`}
           >
             <span className="register-stepper__num">1</span>
-            <span className="register-stepper__label">Identité</span>
+            <span className="register-stepper__label">{isEn ? 'Identity' : 'Identité'}</span>
           </div>
           <div className={`register-stepper__bar ${step === 2 ? 'filled' : ''}`} aria-hidden />
           <div className={`register-stepper__segment ${step === 2 ? 'active' : ''}`}>
             <span className="register-stepper__num">2</span>
-            <span className="register-stepper__label">Compte</span>
+            <span className="register-stepper__label">{isEn ? 'Account' : 'Compte'}</span>
           </div>
         </div>
 
@@ -130,40 +142,40 @@ const Register = () => {
           {step === 1 && (
             <>
               <div className="form-group">
-                <label>Civilité *</label>
+                <label>{isEn ? 'Title *' : 'Civilité *'}</label>
                 <select
                   value={civility}
                   onChange={(e) => setCivility(e.target.value as 'MR' | 'MS' | 'MX')}
                   className="form-control"
                   required
                 >
-                  <option value="MR">Monsieur</option>
-                  <option value="MS">Madame</option>
-                  <option value="MX">Autre</option>
+                  <option value="MR">{isEn ? 'Mr' : 'Monsieur'}</option>
+                  <option value="MS">{isEn ? 'Mrs/Ms' : 'Madame'}</option>
+                  <option value="MX">{isEn ? 'Other' : 'Autre'}</option>
                 </select>
               </div>
 
               <div className="form-grid-2">
                 <div className="form-group">
-                  <label>Prénom *</label>
+                  <label>{isEn ? 'First name *' : 'Prénom *'}</label>
                   <input
                     type="text"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     className="form-control"
-                    placeholder="Prénom"
+                    placeholder={isEn ? 'First name' : 'Prénom'}
                     required
                     autoComplete="given-name"
                   />
                 </div>
                 <div className="form-group">
-                  <label>Nom *</label>
+                  <label>{isEn ? 'Last name *' : 'Nom *'}</label>
                   <input
                     type="text"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     className="form-control"
-                    placeholder="Nom"
+                    placeholder={isEn ? 'Last name' : 'Nom'}
                     required
                     autoComplete="family-name"
                   />
@@ -171,7 +183,7 @@ const Register = () => {
               </div>
 
               <div className="form-group">
-                <label>Téléphone *</label>
+                <label>{isEn ? 'Phone *' : 'Téléphone *'}</label>
                 <input
                   type="tel"
                   value={phone}
@@ -181,11 +193,11 @@ const Register = () => {
                   required
                   autoComplete="tel"
                 />
-                <small className="form-hint">Format international (E.164)</small>
+                <small className="form-hint">{isEn ? 'International format (E.164)' : 'Format international (E.164)'}</small>
               </div>
 
               <button type="button" className="btn btn-primary btn-block" onClick={goNext}>
-                Continuer
+                {isEn ? 'Continue' : 'Continuer'}
                 <ChevronRight size={18} aria-hidden />
               </button>
             </>
@@ -207,26 +219,26 @@ const Register = () => {
               </div>
 
               <div className="form-group">
-                <label>Confirmer l&apos;email *</label>
+                <label>{isEn ? 'Confirm email *' : 'Confirmer l&apos;email *'}</label>
                 <input
                   type="email"
                   value={confirmEmail}
                   onChange={(e) => setConfirmEmail(e.target.value)}
                   className="form-control"
-                  placeholder="votre@email.com"
+                  placeholder={isEn ? 'your@email.com' : 'votre@email.com'}
                   required
                   autoComplete="email"
                 />
               </div>
 
               <div className="form-group">
-                <label>Mot de passe *</label>
+                <label>{isEn ? 'Password *' : 'Mot de passe *'}</label>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="form-control"
-                  placeholder="Au moins 6 caractères"
+                  placeholder={isEn ? 'At least 6 characters' : 'Au moins 6 caractères'}
                   required
                   minLength={6}
                   autoComplete="new-password"
@@ -236,10 +248,10 @@ const Register = () => {
               <div className="register-form-actions">
                 <button type="button" className="btn btn-outline" onClick={goBack} disabled={loading}>
                   <ChevronLeft size={18} aria-hidden />
-                  Retour
+                  {isEn ? 'Back' : 'Retour'}
                 </button>
                 <button type="submit" className="btn btn-primary" disabled={loading}>
-                  {loading ? 'Inscription…' : "S'inscrire"}
+                  {loading ? (isEn ? 'Signing up...' : 'Inscription…') : (isEn ? 'Sign up' : "S'inscrire")}
                 </button>
               </div>
             </>
@@ -247,9 +259,9 @@ const Register = () => {
         </form>
         
         <div className="auth-footer">
-          <p>Déjà un compte ? <Link to="/login">Connectez-vous</Link></p>
+          <p>{isEn ? 'Already have an account?' : 'Déjà un compte ?'} <Link to="/login">{isEn ? 'Log in' : 'Connectez-vous'}</Link></p>
           <p>
-            <Link to="/register">Autre type de compte (candidat ou employeur)</Link>
+            <Link to="/register">{isEn ? 'Another account type (candidate or employer)' : 'Autre type de compte (candidat ou employeur)'}</Link>
           </p>
         </div>
       </div>

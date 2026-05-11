@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { authApi } from '../api/authApi';
+import { useLanguage } from '../context/LanguageContext';
 
 const ChangePasswordForm: React.FC = () => {
+  const { language } = useLanguage();
+  const isEn = language === 'en';
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
@@ -20,12 +23,12 @@ const ChangePasswordForm: React.FC = () => {
         newPassword,
         confirmNewPassword
       );
-      setSuccess('Mot de passe modifié avec succès.');
+      setSuccess(isEn ? 'Password updated successfully.' : 'Mot de passe modifié avec succès.');
       setCurrentPassword('');
       setNewPassword('');
       setConfirmNewPassword('');
     } catch (err: any) {
-      setError(err.message || 'Erreur lors du changement de mot de passe');
+      setError(err.message || (isEn ? 'Error while changing password' : 'Erreur lors du changement de mot de passe'));
     } finally {
       setLoading(false);
     }
@@ -33,9 +36,9 @@ const ChangePasswordForm: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit} className="change-password-form">
-      <h2>Modifier le mot de passe</h2>
+      <h2>{isEn ? 'Change password' : 'Modifier le mot de passe'}</h2>
       <div className="form-group">
-        <label>Mot de passe actuel</label>
+        <label>{isEn ? 'Current password' : 'Mot de passe actuel'}</label>
         <input
           type="password"
           className="form-control"
@@ -45,7 +48,7 @@ const ChangePasswordForm: React.FC = () => {
         />
       </div>
       <div className="form-group">
-        <label>Nouveau mot de passe</label>
+        <label>{isEn ? 'New password' : 'Nouveau mot de passe'}</label>
         <input
           type="password"
           className="form-control"
@@ -55,7 +58,7 @@ const ChangePasswordForm: React.FC = () => {
         />
       </div>
       <div className="form-group">
-        <label>Confirmer le nouveau mot de passe</label>
+        <label>{isEn ? 'Confirm new password' : 'Confirmer le nouveau mot de passe'}</label>
         <input
           type="password"
           className="form-control"
@@ -67,7 +70,7 @@ const ChangePasswordForm: React.FC = () => {
       {error && <div className="error">{error}</div>}
       {success && <div className="success">{success}</div>}
       <button type="submit" className="btn btn-primary" disabled={loading}>
-        {loading ? 'Modification...' : 'Modifier le mot de passe'}
+        {loading ? (isEn ? 'Updating...' : 'Modification...') : (isEn ? 'Change password' : 'Modifier le mot de passe')}
       </button>
     </form>
   );

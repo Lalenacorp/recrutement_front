@@ -32,6 +32,7 @@ import {
 import { createContest, listContestsAdmin, publishContest, archiveContest } from '../api/contestApi';
 import { createEvent, listEventsAdmin, publishEvent, archiveEvent, updateEvent, deleteEvent } from '../api/eventApi';
 import type { ContestResponse, EventResponse } from '../types';
+import { useSEO } from '../utils/useSEO';
 import ChangePasswordForm from '../components/ChangePasswordForm';
 import ConfirmModal from '../components/ConfirmModal';
 
@@ -84,6 +85,13 @@ function formatPreInscriptionFieldValue(value: unknown): string {
 const AdminDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  useSEO({
+    title: 'Administration',
+    description: 'Espace administrateur SNJobConnect.',
+    path: '/admin/dashboard',
+    noIndex: true,
+  });
   const [activeMenu, setActiveMenu] = useState<MenuItem>('dashboard');
   const [stats, setStats] = useState<PlatformStats | null>(null);
   const [loading, setLoading] = useState(true);

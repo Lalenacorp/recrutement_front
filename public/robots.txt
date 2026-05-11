@@ -1,0 +1,48 @@
+# https://www.snjobconnect.com/robots.txt
+# Allow all reputable crawlers (Google, Bing, DuckDuckGo, OpenAI, Anthropic, Perplexity...)
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /candidate/dashboard
+Disallow: /employer/dashboard
+Disallow: /employer/applications
+Disallow: /api/
+Disallow: /verify-email
+Disallow: /reset-password
+Disallow: /forgot-password
+
+# AI crawlers — explicitly allowed so SNJobConnect is discoverable by AI search engines
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+# Sitemap
+Sitemap: https://snjobconnect.com/sitemap.xml
+Host: https://snjobconnect.com

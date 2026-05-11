@@ -1,10 +1,12 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { Briefcase, LogOut, User, Home, PlusCircle, FileText, Calendar, Trophy, Menu, X, GraduationCap } from 'lucide-react';
 import { useState } from 'react';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -21,9 +23,9 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <Link to="/" className="navbar-logo">
+        <Link to="/" className="navbar-logo" aria-label="SNJobConnect — accueil">
           <Briefcase size={28} />
-          <span>JobConnect</span>
+          <span>SNJobConnect</span>
         </Link>
         
         {/* Menu hamburger button */}
@@ -38,57 +40,68 @@ const Navbar = () => {
         <div className={`navbar-menu ${isMenuOpen ? 'active' : ''}`}>
           <Link to="/" className="navbar-link" onClick={closeMenu}>
             <Home size={18} />
-            Accueil
+            {t('nav.home')}
           </Link>
           <Link to="/jobs" className="navbar-link" onClick={closeMenu}>
             <FileText size={18} />
-            Offres d'emploi
+            {t('nav.jobs')}
           </Link>
           <Link to="/contests" className="navbar-link" onClick={closeMenu}>
             <Trophy size={18} />
-            Concours
+            {t('nav.contests')}
           </Link>
           <Link to="/events" className="navbar-link" onClick={closeMenu}>
             <Calendar size={18} />
-            Événements
+            {t('nav.events')}
           </Link>
-          <Link to="/etudes-canada" className="navbar-link" onClick={closeMenu}>
+          <Link to="/espace-etudiant" className="navbar-link" onClick={closeMenu}>
             <GraduationCap size={18} />
-            Étudier à l'étranger
+            {t('nav.study')}
           </Link>
+          <label className="navbar-link navbar-language">
+            {t('nav.language')}
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as 'fr' | 'en')}
+              className="navbar-language-select"
+            >
+              <option value="fr">FR</option>
+              <option value="en">EN</option>
+            </select>
+          </label>
           
           {user ? (
             <>
               {user.role === 'employer' && (
                 <Link to="/employer/dashboard" className="navbar-link" onClick={closeMenu}>
                   <PlusCircle size={18} />
-                  Dashboard
+                  {t('nav.dashboard')}
                 </Link>
               )}
               {user.role === 'candidate' && (
                 <Link to="/candidate/dashboard" className="navbar-link" onClick={closeMenu}>
                   <User size={18} />
-                  Mon profil
+                  {t('nav.profile')}
                 </Link>
               )}
               {user.role === 'admin' && (
                 <Link to="/admin/dashboard" className="navbar-link" onClick={closeMenu}>
                   <PlusCircle size={18} />
-                  Admin
+                  {t('nav.admin')}
                 </Link>
               )}
               <button onClick={handleLogout} className="navbar-button logout">
                 <LogOut size={18} />
-                Déconnexion
+                {t('nav.logout')}
               </button>
             </>
           ) : (
             <>
               <Link to="/login" className="navbar-button" onClick={closeMenu}>
-                Connexion
+                {t('nav.login')}
               </Link>
               <Link to="/register" className="navbar-button primary" onClick={closeMenu}>
-                Inscription
+                {t('nav.register')}
               </Link>
             </>
           )}

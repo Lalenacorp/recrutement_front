@@ -4,10 +4,22 @@ import { Briefcase, AlertCircle, ChevronLeft, ChevronRight, ChevronDown } from '
 import { authApi, ApiError } from '../api/authApi';
 import type { EmployerSignupRequest, CompanySector, CompanySize } from '../api/types';
 import EmailVerificationPending from './EmailVerificationPending';
+import { useLanguage } from '../context/LanguageContext';
+import { useSEO } from '../utils/useSEO';
 
 const PHONE_E164 = /^\+[1-9]\d{1,14}$/;
 
 const EmployerRegister = () => {
+  const { language } = useLanguage();
+  const isEn = language === 'en';
+
+  useSEO({
+    title: isEn ? 'Employer sign up' : 'Inscription employeur',
+    description: isEn
+      ? 'Create your employer account on SNJobConnect: post jobs, manage applications and hire the best talent in Senegal.'
+      : "Créez votre compte employeur sur SNJobConnect : publiez vos offres d'emploi, gérez vos candidatures et recrutez les meilleurs talents au Sénégal.",
+    path: '/register/employeur',
+  });
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,24 +53,24 @@ const EmployerRegister = () => {
   });
 
   const companySectors: { value: CompanySector; label: string }[] = [
-    { value: 'TECHNOLOGY', label: 'Technologie' },
+    { value: 'TECHNOLOGY', label: isEn ? 'Technology' : 'Technologie' },
     { value: 'FINANCE', label: 'Finance' },
-    { value: 'HEALTHCARE', label: 'Santé' },
-    { value: 'EDUCATION', label: 'Éducation' },
-    { value: 'RETAIL', label: 'Commerce' },
-    { value: 'MANUFACTURING', label: 'Industrie' },
+    { value: 'HEALTHCARE', label: isEn ? 'Healthcare' : 'Santé' },
+    { value: 'EDUCATION', label: isEn ? 'Education' : 'Éducation' },
+    { value: 'RETAIL', label: isEn ? 'Retail' : 'Commerce' },
+    { value: 'MANUFACTURING', label: isEn ? 'Manufacturing' : 'Industrie' },
     { value: 'CONSTRUCTION', label: 'Construction' },
-    { value: 'TRANSPORTATION', label: 'Transport' },
-    { value: 'HOSPITALITY', label: 'Hôtellerie' },
-    { value: 'OTHER', label: 'Autre' },
+    { value: 'TRANSPORTATION', label: isEn ? 'Transportation' : 'Transport' },
+    { value: 'HOSPITALITY', label: isEn ? 'Hospitality' : 'Hôtellerie' },
+    { value: 'OTHER', label: isEn ? 'Other' : 'Autre' },
   ];
 
   const companySizes: { value: CompanySize; label: string }[] = [
-    { value: 'SIZE_1_10', label: '1-10 employés' },
-    { value: 'SIZE_11_50', label: '11-50 employés' },
-    { value: 'SIZE_51_200', label: '51-200 employés' },
-    { value: 'SIZE_201_1000', label: '201-1000 employés' },
-    { value: 'SIZE_1000_PLUS', label: '1000+ employés' },
+    { value: 'SIZE_1_10', label: isEn ? '1-10 employees' : '1-10 employés' },
+    { value: 'SIZE_11_50', label: isEn ? '11-50 employees' : '11-50 employés' },
+    { value: 'SIZE_51_200', label: isEn ? '51-200 employees' : '51-200 employés' },
+    { value: 'SIZE_201_1000', label: isEn ? '201-1000 employees' : '201-1000 employés' },
+    { value: 'SIZE_1000_PLUS', label: isEn ? '1000+ employees' : '1000+ employés' },
   ];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -126,31 +138,31 @@ const EmployerRegister = () => {
 
   const validateStep1 = (): boolean => {
     if (!formData.companyName.trim()) {
-      setError('Indiquez le nom de l’entreprise');
+      setError(isEn ? 'Enter the company name' : 'Indiquez le nom de l’entreprise');
       return false;
     }
     if (!formData.companyAddress.trim()) {
-      setError('Indiquez l’adresse');
+      setError(isEn ? 'Enter the address' : 'Indiquez l’adresse');
       return false;
     }
     if (!formData.companyCity.trim()) {
-      setError('Indiquez la ville');
+      setError(isEn ? 'Enter the city' : 'Indiquez la ville');
       return false;
     }
     if (!(formData.companyPostalCode ?? '').trim()) {
-      setError('Indiquez le code postal');
+      setError(isEn ? 'Enter the postal code' : 'Indiquez le code postal');
       return false;
     }
     if (formData.companySectors.length === 0) {
-      setError('Sélectionnez au moins un secteur d’activité');
+      setError(isEn ? 'Select at least one business sector' : 'Sélectionnez au moins un secteur d’activité');
       return false;
     }
     if (formData.companySectors.length > 5) {
-      setError('Vous ne pouvez sélectionner que 5 secteurs maximum');
+      setError(isEn ? 'You can select up to 5 sectors only' : 'Vous ne pouvez sélectionner que 5 secteurs maximum');
       return false;
     }
     if (!formData.companyDescription.trim()) {
-      setError('Rédigez une description de l’entreprise');
+      setError(isEn ? 'Write a company description' : 'Rédigez une description de l’entreprise');
       return false;
     }
     return true;
@@ -158,25 +170,25 @@ const EmployerRegister = () => {
 
   const validateStep2 = (): boolean => {
     if (!formData.firstName.trim() || !formData.lastName.trim()) {
-      setError('Indiquez le prénom et le nom du contact');
+      setError(isEn ? 'Enter contact first and last name' : 'Indiquez le prénom et le nom du contact');
       return false;
     }
     if (!(formData.jobTitle ?? '').trim()) {
-      setError('Indiquez le poste occupé');
+      setError(isEn ? 'Enter job title' : 'Indiquez le poste occupé');
       return false;
     }
     const primary = (formData.phonePrimary ?? '').trim();
     if (!primary) {
-      setError('Indiquez un téléphone principal');
+      setError(isEn ? 'Enter a primary phone number' : 'Indiquez un téléphone principal');
       return false;
     }
     if (!PHONE_E164.test(primary)) {
-      setError('Téléphone principal invalide. Format international requis (ex. +221701234567)');
+      setError(isEn ? 'Invalid primary phone. International format required (e.g. +221701234567)' : 'Téléphone principal invalide. Format international requis (ex. +221701234567)');
       return false;
     }
     const secondary = (formData.phoneSecondary ?? '').trim();
     if (secondary && !PHONE_E164.test(secondary)) {
-      setError('Téléphone secondaire invalide. Utilisez le même format international.');
+      setError(isEn ? 'Invalid secondary phone. Use the same international format.' : 'Téléphone secondaire invalide. Utilisez le même format international.');
       return false;
     }
     return true;
@@ -200,12 +212,12 @@ const EmployerRegister = () => {
     setFieldErrors({});
 
     if (formData.email !== formData.confirmEmail) {
-      setError('Les adresses email ne correspondent pas');
+      setError(isEn ? 'Email addresses do not match' : 'Les adresses email ne correspondent pas');
       return;
     }
 
     if (formData.password.length < 8) {
-      setError('Le mot de passe doit contenir au moins 8 caractères');
+      setError(isEn ? 'Password must contain at least 8 characters' : 'Le mot de passe doit contenir au moins 8 caractères');
       return;
     }
 
@@ -222,7 +234,7 @@ const EmployerRegister = () => {
           setFieldErrors(err.errors);
         }
       } else {
-        setError('Une erreur inattendue est survenue');
+        setError(isEn ? 'An unexpected error occurred' : 'Une erreur inattendue est survenue');
       }
     } finally {
       setLoading(false);
@@ -240,32 +252,32 @@ const EmployerRegister = () => {
       <div className="auth-container auth-container--employer-register">
         <Link to="/register" className="register-profile-back">
           <ChevronLeft size={18} aria-hidden />
-          Choisir un autre profil
+          {isEn ? 'Choose another profile' : 'Choisir un autre profil'}
         </Link>
         <div className="auth-header auth-header--compact">
           <Briefcase size={36} />
-          <h2>Inscription Employeur</h2>
-          <p>Créez votre compte pour publier des offres d’emploi</p>
+          <h2>{isEn ? 'Employer sign up' : 'Inscription Employeur'}</h2>
+          <p>{isEn ? 'Create your account to publish job offers' : 'Créez votre compte pour publier des offres d’emploi'}</p>
         </div>
 
-        <div className="employer-register-stepper" aria-label="Progression du formulaire">
+        <div className="employer-register-stepper" aria-label={isEn ? 'Form progress' : 'Progression du formulaire'}>
           <div
             className={`employer-register-stepper__item ${step === 1 ? 'active' : ''} ${step > 1 ? 'done' : ''}`}
           >
             <span className="employer-register-stepper__num">1</span>
-            <span className="employer-register-stepper__label">Entreprise</span>
+            <span className="employer-register-stepper__label">{isEn ? 'Company' : 'Entreprise'}</span>
           </div>
           <div className={`employer-register-stepper__bar ${step >= 2 ? 'filled' : ''}`} aria-hidden />
           <div
             className={`employer-register-stepper__item ${step === 2 ? 'active' : ''} ${step > 2 ? 'done' : ''}`}
           >
             <span className="employer-register-stepper__num">2</span>
-            <span className="employer-register-stepper__label">Contact</span>
+            <span className="employer-register-stepper__label">{isEn ? 'Contact' : 'Contact'}</span>
           </div>
           <div className={`employer-register-stepper__bar ${step >= 3 ? 'filled' : ''}`} aria-hidden />
           <div className={`employer-register-stepper__item ${step === 3 ? 'active' : ''}`}>
             <span className="employer-register-stepper__num">3</span>
-            <span className="employer-register-stepper__label">Compte</span>
+            <span className="employer-register-stepper__label">{isEn ? 'Account' : 'Compte'}</span>
           </div>
         </div>
 
@@ -282,10 +294,10 @@ const EmployerRegister = () => {
         >
           {step === 1 && (
             <>
-              <p className="employer-register-step-intro">Informations sur votre structure</p>
+              <p className="employer-register-step-intro">{isEn ? 'Information about your company' : 'Informations sur votre structure'}</p>
 
               <div className="form-group">
-                <label>Nom de l&apos;entreprise *</label>
+                <label>{isEn ? 'Company name *' : 'Nom de l&apos;entreprise *'}</label>
                 <input
                   type="text"
                   name="companyName"
@@ -298,7 +310,7 @@ const EmployerRegister = () => {
               </div>
 
               <div className="form-group">
-                <label>Adresse *</label>
+                <label>{isEn ? 'Address *' : 'Adresse *'}</label>
                 <input
                   type="text"
                   name="companyAddress"
@@ -312,7 +324,7 @@ const EmployerRegister = () => {
 
               <div className="form-grid-2 employer-register-address-row">
                 <div className="form-group">
-                  <label>Ville *</label>
+                  <label>{isEn ? 'City *' : 'Ville *'}</label>
                   <input
                     type="text"
                     name="companyCity"
@@ -324,7 +336,7 @@ const EmployerRegister = () => {
                   {fieldErr('companyCity') && <span className="field-error">{fieldErr('companyCity')}</span>}
                 </div>
                 <div className="form-group">
-                  <label>Code postal *</label>
+                  <label>{isEn ? 'Postal code *' : 'Code postal *'}</label>
                   <input
                     type="text"
                     name="companyPostalCode"
@@ -340,7 +352,7 @@ const EmployerRegister = () => {
               </div>
 
               <div className="form-group">
-                <label>Pays *</label>
+                <label>{isEn ? 'Country *' : 'Pays *'}</label>
                 <select
                   name="companyCountryCode"
                   value={formData.companyCountryCode}
@@ -348,12 +360,12 @@ const EmployerRegister = () => {
                   className="form-control"
                   required
                 >
-                  <option value="SN">Sénégal</option>
+                  <option value="SN">{isEn ? 'Senegal' : 'Sénégal'}</option>
                 </select>
               </div>
 
               <div className="form-group">
-                <label id="sectors-label">Secteurs d&apos;activité * (1 à 5)</label>
+                <label id="sectors-label">{isEn ? 'Business sectors * (1 to 5)' : 'Secteurs d&apos;activité * (1 à 5)'}</label>
                 <div
                   className={`sector-multiselect ${fieldErrors.companySectors ? 'sector-multiselect--error' : ''}`}
                   ref={sectorDropdownRef}
@@ -402,12 +414,12 @@ const EmployerRegister = () => {
                     </div>
                   )}
                 </div>
-                <small className="form-hint">Cochez jusqu&apos;à 5 secteurs</small>
+                <small className="form-hint">{isEn ? 'Select up to 5 sectors' : 'Cochez jusqu&apos;à 5 secteurs'}</small>
                 {fieldErr('companySectors') && <span className="field-error">{fieldErr('companySectors')}</span>}
               </div>
 
               <div className="form-group">
-                <label>Taille de l&apos;entreprise *</label>
+                <label>{isEn ? 'Company size *' : 'Taille de l&apos;entreprise *'}</label>
                 <select
                   name="companySize"
                   value={formData.companySize}
@@ -424,14 +436,14 @@ const EmployerRegister = () => {
               </div>
 
               <div className="form-group">
-                <label>Description de l&apos;entreprise *</label>
+                <label>{isEn ? 'Company description *' : 'Description de l&apos;entreprise *'}</label>
                 <textarea
                   name="companyDescription"
                   value={formData.companyDescription}
                   onChange={handleChange}
                   className={`form-control ${fieldErrors.companyDescription ? 'error' : ''}`}
                   rows={4}
-                  placeholder="Activités, mission, valeurs…"
+                  placeholder={isEn ? 'Activities, mission, values...' : 'Activités, mission, valeurs…'}
                   required
                 />
                 {fieldErr('companyDescription') && (
@@ -440,7 +452,7 @@ const EmployerRegister = () => {
               </div>
 
               <div className="form-group">
-                <label>Site web</label>
+                <label>{isEn ? 'Website' : 'Site web'}</label>
                 <input
                   type="url"
                   name="companyWebsite"
@@ -453,13 +465,13 @@ const EmployerRegister = () => {
               </div>
 
               <div className="form-group">
-                <label>Logo (optionnel)</label>
+                <label>{isEn ? 'Logo (optional)' : 'Logo (optionnel)'}</label>
                 <input type="file" accept="image/*" onChange={handleLogoChange} className="form-control" />
-                <small className="form-hint">PNG ou JPG, max. 2 Mo recommandé</small>
+                <small className="form-hint">{isEn ? 'PNG or JPG, recommended max 2 MB' : 'PNG ou JPG, max. 2 Mo recommandé'}</small>
               </div>
 
               <button type="button" className="btn btn-primary btn-block" onClick={goNext}>
-                Continuer
+                {isEn ? 'Continue' : 'Continuer'}
                 <ChevronRight size={18} aria-hidden />
               </button>
             </>
@@ -467,10 +479,10 @@ const EmployerRegister = () => {
 
           {step === 2 && (
             <>
-              <p className="employer-register-step-intro">Personne référente côté entreprise</p>
+              <p className="employer-register-step-intro">{isEn ? 'Primary contact person' : 'Personne référente côté entreprise'}</p>
 
               <div className="form-group">
-                <label>Civilité *</label>
+                <label>{isEn ? 'Title *' : 'Civilité *'}</label>
                 <select
                   name="civility"
                   value={formData.civility}
@@ -478,15 +490,15 @@ const EmployerRegister = () => {
                   className="form-control"
                   required
                 >
-                  <option value="MR">Monsieur</option>
-                  <option value="MS">Madame</option>
-                  <option value="MX">Autre</option>
+                  <option value="MR">{isEn ? 'Mr' : 'Monsieur'}</option>
+                  <option value="MS">{isEn ? 'Mrs/Ms' : 'Madame'}</option>
+                  <option value="MX">{isEn ? 'Other' : 'Autre'}</option>
                 </select>
               </div>
 
               <div className="form-grid-2">
                 <div className="form-group">
-                  <label>Prénom *</label>
+                  <label>{isEn ? 'First name *' : 'Prénom *'}</label>
                   <input
                     type="text"
                     name="firstName"
@@ -498,7 +510,7 @@ const EmployerRegister = () => {
                   {fieldErr('firstName') && <span className="field-error">{fieldErr('firstName')}</span>}
                 </div>
                 <div className="form-group">
-                  <label>Nom *</label>
+                  <label>{isEn ? 'Last name *' : 'Nom *'}</label>
                   <input
                     type="text"
                     name="lastName"
@@ -512,21 +524,21 @@ const EmployerRegister = () => {
               </div>
 
               <div className="form-group">
-                <label>Poste occupé *</label>
+                <label>{isEn ? 'Job title *' : 'Poste occupé *'}</label>
                 <input
                   type="text"
                   name="jobTitle"
                   value={formData.jobTitle}
                   onChange={handleChange}
                   className={`form-control ${fieldErrors.jobTitle ? 'error' : ''}`}
-                  placeholder="Directeur RH, CEO…"
+                  placeholder={isEn ? 'HR Director, CEO...' : 'Directeur RH, CEO…'}
                   required
                 />
                 {fieldErr('jobTitle') && <span className="field-error">{fieldErr('jobTitle')}</span>}
               </div>
 
               <div className="form-group">
-                <label>Téléphone principal *</label>
+                <label>{isEn ? 'Primary phone *' : 'Téléphone principal *'}</label>
                 <input
                   type="tel"
                   name="phonePrimary"
@@ -536,12 +548,12 @@ const EmployerRegister = () => {
                   placeholder="+221701234567"
                   required
                 />
-                <small className="form-hint">Format international (E.164)</small>
+                <small className="form-hint">{isEn ? 'International format (E.164)' : 'Format international (E.164)'}</small>
                 {fieldErr('phonePrimary') && <span className="field-error">{fieldErr('phonePrimary')}</span>}
               </div>
 
               <div className="form-group">
-                <label>Téléphone secondaire</label>
+                <label>{isEn ? 'Secondary phone' : 'Téléphone secondaire'}</label>
                 <input
                   type="tel"
                   name="phoneSecondary"
@@ -554,7 +566,7 @@ const EmployerRegister = () => {
               </div>
 
               <div className="form-group">
-                <label>Profil LinkedIn</label>
+                <label>{isEn ? 'LinkedIn profile' : 'Profil LinkedIn'}</label>
                 <input
                   type="url"
                   name="linkedinUrl"
@@ -569,10 +581,10 @@ const EmployerRegister = () => {
               <div className="register-form-actions">
                 <button type="button" className="btn btn-outline" onClick={goBack}>
                   <ChevronLeft size={18} aria-hidden />
-                  Retour
+                  {isEn ? 'Back' : 'Retour'}
                 </button>
                 <button type="button" className="btn btn-primary" onClick={goNext}>
-                  Continuer
+                  {isEn ? 'Continue' : 'Continuer'}
                   <ChevronRight size={18} aria-hidden />
                 </button>
               </div>
@@ -581,7 +593,7 @@ const EmployerRegister = () => {
 
           {step === 3 && (
             <>
-              <p className="employer-register-step-intro">Identifiants de connexion</p>
+              <p className="employer-register-step-intro">{isEn ? 'Login credentials' : 'Identifiants de connexion'}</p>
 
               <div className="form-group">
                 <label>Email *</label>
@@ -599,7 +611,7 @@ const EmployerRegister = () => {
               </div>
 
               <div className="form-group">
-                <label>Confirmer l&apos;email *</label>
+                <label>{isEn ? 'Confirm email *' : 'Confirmer l&apos;email *'}</label>
                 <input
                   type="email"
                   name="confirmEmail"
@@ -614,29 +626,29 @@ const EmployerRegister = () => {
               </div>
 
               <div className="form-group">
-                <label>Mot de passe *</label>
+                <label>{isEn ? 'Password *' : 'Mot de passe *'}</label>
                 <input
                   type="password"
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
                   className={`form-control ${fieldErrors.password ? 'error' : ''}`}
-                  placeholder="Minimum 8 caractères"
+                  placeholder={isEn ? 'Minimum 8 characters' : 'Minimum 8 caractères'}
                   required
                   minLength={8}
                   autoComplete="new-password"
                 />
-                <small className="form-hint">Minimum 8 caractères</small>
+                <small className="form-hint">{isEn ? 'Minimum 8 characters' : 'Minimum 8 caractères'}</small>
                 {fieldErr('password') && <span className="field-error">{fieldErr('password')}</span>}
               </div>
 
               <div className="register-form-actions">
                 <button type="button" className="btn btn-outline" onClick={goBack} disabled={loading}>
                   <ChevronLeft size={18} aria-hidden />
-                  Retour
+                  {isEn ? 'Back' : 'Retour'}
                 </button>
                 <button type="submit" className="btn btn-primary" disabled={loading}>
-                  {loading ? 'Inscription…' : "S'inscrire"}
+                  {loading ? (isEn ? 'Signing up...' : 'Inscription…') : (isEn ? 'Sign up' : "S'inscrire")}
                 </button>
               </div>
             </>
@@ -644,9 +656,9 @@ const EmployerRegister = () => {
         </form>
 
         <div className="auth-footer">
-          <p>Déjà un compte ? <Link to="/login">Connectez-vous</Link></p>
+          <p>{isEn ? 'Already have an account?' : 'Déjà un compte ?'} <Link to="/login">{isEn ? 'Log in' : 'Connectez-vous'}</Link></p>
           <p>
-            <Link to="/register">Autre type de compte (candidat ou employeur)</Link>
+            <Link to="/register">{isEn ? 'Another account type (candidate or employer)' : 'Autre type de compte (candidat ou employeur)'}</Link>
           </p>
         </div>
       </div>

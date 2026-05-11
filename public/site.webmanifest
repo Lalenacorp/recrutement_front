@@ -1,0 +1,21 @@
+{
+  "name": "SNJobConnect — Emploi, Formation & Espace Étudiant au Sénégal",
+  "short_name": "SNJobConnect",
+  "description": "Plateforme #1 au Sénégal pour l'emploi, les concours, la formation et les études à l'étranger.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#FFFFFF",
+  "theme_color": "#00427E",
+  "lang": "fr",
+  "categories": ["business", "education", "productivity"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

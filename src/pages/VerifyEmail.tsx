@@ -1,8 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams, useLocation, Link } from 'react-router-dom';
 import { CheckCircle, XCircle, Loader } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
+import { useSEO } from '../utils/useSEO';
 
 const VerifyEmail = () => {
+  const { language } = useLanguage();
+  const isEn = language === 'en';
+
+  useSEO({
+    title: isEn ? 'Email verification' : 'Vérification de l\'email',
+    description: isEn
+      ? 'Confirm your email address on SNJobConnect.'
+      : 'Confirmez votre adresse email sur SNJobConnect.',
+    path: '/verify-email',
+    noIndex: true,
+  });
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const token = searchParams.get('token');
@@ -14,7 +27,7 @@ const VerifyEmail = () => {
     const verifyEmail = async () => {
       if (!token) {
         setStatus('error');
-        setMessage('Token de vérification manquant');
+        setMessage(isEn ? 'Missing verification token' : 'Token de vérification manquant');
         return;
       }
 
@@ -32,7 +45,7 @@ const VerifyEmail = () => {
             ? ['/api/auth/verify-email-employee']
             : ['/api/auth/verify-email'];
 
-        let lastErrorMessage = 'Erreur lors de la vérification';
+        let lastErrorMessage = isEn ? 'Verification error' : 'Erreur lors de la vérification';
 
         for (const endpointPath of endpoints) {
           const response = await fetch(
@@ -44,18 +57,22 @@ const VerifyEmail = () => {
 
           if (response.ok) {
             const contentType = response.headers.get('Content-Type') || '';
-            let successMessage = 'Email vérifié avec succès. Vous pouvez maintenant vous connecter.';
+            let successMessage = isEn
+              ? 'Email verified successfully. You can now log in.'
+              : 'Email vérifié avec succès. Vous pouvez maintenant vous connecter.';
 
             if (contentType.includes('application/json')) {
               const data = await response.json().catch(() => ({} as any));
               if (data && typeof data.message === 'string' && data.message.trim().length > 0) {
-                successMessage = `${data.message} Vous pouvez maintenant vous connecter.`;
+                successMessage = isEn
+                  ? `${data.message} You can now log in.`
+                  : `${data.message} Vous pouvez maintenant vous connecter.`;
               }
             } else if (contentType.includes('text/plain')) {
               // Seulement si c'est du texte brut, pas du HTML
               const text = await response.text();
               if (text && text.trim().length > 0 && !text.includes('<html') && !text.includes('<!doctype')) {
-                successMessage = `${text} Vous pouvez maintenant vous connecter.`;
+                successMessage = isEn ? `${text} You can now log in.` : `${text} Vous pouvez maintenant vous connecter.`;
               }
             }
 
@@ -74,7 +91,7 @@ const VerifyEmail = () => {
         setMessage(lastErrorMessage);
       } catch (error) {
         setStatus('error');
-        setMessage('Erreur de connexion au serveur');
+        setMessage(isEn ? 'Server connection error' : 'Erreur de connexion au serveur');
       }
     };
 
@@ -97,9 +114,9 @@ const VerifyEmail = () => {
           {status === 'error' && <XCircle size={60} style={{ color: '#ef4444' }} />}
           
           <h2>
-            {status === 'loading' && 'Vérification en cours...'}
-            {status === 'success' && 'Email vérifié !'}
-            {status === 'error' && 'Vérification échouée'}
+            {status === 'loading' && (isEn ? 'Verifying...' : 'Vérification en cours...')}
+            {status === 'success' && (isEn ? 'Email verified!' : 'Email vérifié !')}
+            {status === 'error' && (isEn ? 'Verification failed' : 'Vérification échouée')}
           </h2>
           
           <p>{message}</p>
@@ -108,7 +125,7 @@ const VerifyEmail = () => {
         {status === 'success' && (
           <div className="auth-footer">
             <Link to="/login" className="btn btn-primary">
-              Se connecter
+              {isEn ? 'Log in' : 'Se connecter'}
             </Link>
           </div>
         )}
@@ -116,7 +133,7 @@ const VerifyEmail = () => {
         {status === 'error' && (
           <div className="auth-footer">
             <Link to="/register" className="btn btn-primary">
-              S'inscrire à nouveau
+              {isEn ? 'Sign up again' : "S'inscrire à nouveau"}
             </Link>
           </div>
         )}

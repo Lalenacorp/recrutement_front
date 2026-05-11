@@ -80,6 +80,11 @@ export type JobContractType =
   | 'INTERNSHIP'
   | 'TEMPORARY';
 
+export type RemoteWorkType =
+  | 'ON_SITE'
+  | 'HYBRID'
+  | 'REMOTE';
+
 export type JobStatus = 
   | 'DRAFT'      // brouillon (non visible publiquement)
   | 'PUBLISHED'  // publié (visible publiquement)
@@ -93,10 +98,14 @@ export interface JobCreateRequest {
   profileDescription: string;
   experienceLevel: ExperienceLevel;
   requiredLanguages: string[]; // codes ISO ex: "fr", "en"
+  requiredSkills: string[];
   educationLevel: EducationLevel;
   contractType: JobContractType;
-  salaryAmount: number;
+  salaryMin: number;
+  salaryMax: number;
   salaryCurrency: string; // ex: "XOF", "EUR", "USD"
+  location: string;
+  remoteWorkType: RemoteWorkType;
 }
 
 // Interface pour la réponse d'une offre d'emploi
@@ -117,9 +126,11 @@ export interface JobDetails {
   profileDescription: string;
   experienceLevel: ExperienceLevel;
   requiredLanguages: string[];
+  requiredSkills: string[];
   educationLevel: EducationLevel;
   contractType: JobContractType;
-  salaryAmount: number;
+  salaryMin: number;
+  salaryMax: number;
   salaryCurrency: string;
   status: JobStatus;
   publishedAt?: string;
@@ -127,6 +138,8 @@ export interface JobDetails {
   updatedAt: string;
   companyName: string;
   companyId: number;
+  location?: string;
+  remoteWorkType?: RemoteWorkType;
 }
 
 // Interface pour une offre publique (liste)
@@ -135,7 +148,8 @@ export interface PublicJobOffer {
   title: string;
   companyName: string;
   contractType: JobContractType;
-  salaryAmount: number;
+  salaryMin: number;
+  salaryMax: number;
   salaryCurrency: string;
   experienceLevel: ExperienceLevel;
   educationLevel: EducationLevel;
@@ -201,7 +215,8 @@ export interface JobMatchItem {
   matchPercent: number;
   matchHighlights: string[];
   contractType: JobContractType;
-  salaryAmount: number;
+  salaryMin: number;
+  salaryMax: number;
   salaryCurrency: string;
   publishedAt: string;
 }

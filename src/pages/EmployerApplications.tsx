@@ -2,8 +2,15 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { applicationApi } from '../api/applicationApi';
 import type { ApplicationResponse, ApplicationStatus } from '../types';
+import { useSEO } from '../utils/useSEO';
 
 const EmployerApplications = () => {
+  useSEO({
+    title: 'Candidatures reçues',
+    description: 'Suivi des candidatures reçues par votre entreprise sur SNJobConnect.',
+    path: '/employer/applications',
+    noIndex: true,
+  });
   const [searchParams] = useSearchParams();
   const [applications, setApplications] = useState<ApplicationResponse[]>([]);
   const [loading, setLoading] = useState(false);

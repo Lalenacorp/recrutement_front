@@ -3,12 +3,26 @@ import { Trophy, Calendar, Sparkles, Target, Award, Users, Gift, TrendingUp, Clo
 import { Link } from 'react-router-dom';
 import { listPublicContests } from '../api/contestApi';
 import type { ContestResponse } from '../types';
+import { useLanguage } from '../context/LanguageContext';
+import { useSEO } from '../utils/useSEO';
 
 const Contests = () => {
+  const { language } = useLanguage();
+  const isEn = language === 'en';
   const [contests, setContests] = useState<ContestResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'active' | 'upcoming'>('all');
+
+  useSEO({
+    title: isEn ? 'Public contests in Senegal' : 'Concours au Sénégal',
+    description: isEn
+      ? 'Find every open public and private contest in Senegal: schedule, requirements, registration. Apply directly on SNJobConnect.'
+      : "Retrouvez tous les concours publics et privés ouverts au Sénégal : calendrier, conditions, inscription. Postulez directement sur SNJobConnect.",
+    path: '/contests',
+    keywords:
+      'concours Sénégal, concours public Sénégal, concours administration, inscription concours, SNJobConnect',
+  });
 
   useEffect(() => {
     loadContests();
@@ -21,7 +35,7 @@ const Contests = () => {
       const data = await listPublicContests();
       setContests(data);
     } catch (err: any) {
-      setError(err.message || 'Erreur lors du chargement des concours');
+      setError(err.message || (isEn ? 'Error while loading contests' : 'Erreur lors du chargement des concours'));
       console.error('Erreur:', err);
     } finally {
       setLoading(false);
@@ -56,17 +70,17 @@ const Contests = () => {
             <div className="contests-header-content">
               <div className="header-badge">
                 <Sparkles size={16} />
-                <span>Concours & Défis</span>
+                <span>{isEn ? 'Contests & Challenges' : 'Concours & Défis'}</span>
               </div>
-              <h1>Montrez vos talents</h1>
-              <p className="header-subtitle">Participez à nos concours et gagnez des récompenses</p>
+              <h1>{isEn ? 'Show your talent' : 'Montrez vos talents'}</h1>
+              <p className="header-subtitle">{isEn ? 'Join our contests and win rewards' : 'Participez à nos concours et gagnez des récompenses'}</p>
             </div>
           </div>
         </div>
         <div className="container">
           <div className="loading-state">
             <div className="loading-spinner"></div>
-            <p>Chargement des concours...</p>
+            <p>{isEn ? 'Loading contests...' : 'Chargement des concours...'}</p>
           </div>
         </div>
       </div>
@@ -81,10 +95,10 @@ const Contests = () => {
             <div className="contests-header-content">
               <div className="header-badge">
                 <Sparkles size={16} />
-                <span>Concours & Défis</span>
+                <span>{isEn ? 'Contests & Challenges' : 'Concours & Défis'}</span>
               </div>
-              <h1>Montrez vos talents</h1>
-              <p className="header-subtitle">Participez à nos concours et gagnez des récompenses</p>
+              <h1>{isEn ? 'Show your talent' : 'Montrez vos talents'}</h1>
+              <p className="header-subtitle">{isEn ? 'Join our contests and win rewards' : 'Participez à nos concours et gagnez des récompenses'}</p>
             </div>
           </div>
         </div>
@@ -92,7 +106,7 @@ const Contests = () => {
           <div className="error-message">
             <p>{error}</p>
             <button className="btn btn-primary" onClick={loadContests}>
-              Réessayer
+              {isEn ? 'Retry' : 'Réessayer'}
             </button>
           </div>
         </div>
@@ -108,11 +122,13 @@ const Contests = () => {
           <div className="contests-header-content">
             <div className="header-badge">
               <Sparkles size={16} />
-              <span>Concours & Défis</span>
+              <span>{isEn ? 'Contests & Challenges' : 'Concours & Défis'}</span>
             </div>
-            <h1>Montrez vos talents</h1>
+            <h1>{isEn ? 'Show your talent' : 'Montrez vos talents'}</h1>
             <p className="header-subtitle">
-              Participez à {contests.length} concours et gagnez des récompenses exceptionnelles
+              {isEn
+                ? `Join ${contests.length} contests and win exceptional rewards`
+                : `Participez à ${contests.length} concours et gagnez des récompenses exceptionnelles`}
             </p>
 
             {/* Filters */}
@@ -122,21 +138,21 @@ const Contests = () => {
                 onClick={() => setFilter('all')}
               >
                 <Trophy size={18} />
-                Tous les concours
+                {isEn ? 'All contests' : 'Tous les concours'}
               </button>
               <button 
                 className={`filter-btn ${filter === 'active' ? 'active' : ''}`}
                 onClick={() => setFilter('active')}
               >
                 <Target size={18} />
-                En cours ({stats.active})
+                {isEn ? `Active (${stats.active})` : `En cours (${stats.active})`}
               </button>
               <button 
                 className={`filter-btn ${filter === 'upcoming' ? 'active' : ''}`}
                 onClick={() => setFilter('upcoming')}
               >
                 <Clock size={18} />
-                À venir ({stats.upcoming})
+                {isEn ? `Upcoming (${stats.upcoming})` : `À venir (${stats.upcoming})`}
               </button>
             </div>
           </div>
@@ -149,19 +165,19 @@ const Contests = () => {
           <div className="stats-bar-content">
             <div className="stat-badge">
               <Trophy size={18} />
-              <span><strong>{stats.total}</strong> Concours</span>
+              <span><strong>{stats.total}</strong> {isEn ? 'Contests' : 'Concours'}</span>
             </div>
             <div className="stat-badge">
               <Target size={18} />
-              <span><strong>{stats.active}</strong> En cours</span>
+              <span><strong>{stats.active}</strong> {isEn ? 'Active' : 'En cours'}</span>
             </div>
             <div className="stat-badge">
               <Gift size={18} />
-              <span><strong>50+</strong> Récompenses</span>
+              <span><strong>50+</strong> {isEn ? 'Rewards' : 'Récompenses'}</span>
             </div>
             <div className="stat-badge">
               <Users size={18} />
-              <span><strong>{stats.participants.toLocaleString()}</strong> Participants</span>
+              <span><strong>{stats.participants.toLocaleString(isEn ? 'en-US' : 'fr-FR')}</strong> {isEn ? 'Participants' : 'Participants'}</span>
             </div>
           </div>
         </div>
@@ -171,15 +187,19 @@ const Contests = () => {
         {filteredContests.length === 0 ? (
           <div className="empty-state">
             <Trophy size={48} />
-            <h3>Aucun concours {filter !== 'all' ? (filter === 'active' ? 'en cours' : 'à venir') : 'disponible'}</h3>
+            <h3>
+              {isEn
+                ? `No ${filter === 'active' ? 'active ' : filter === 'upcoming' ? 'upcoming ' : ''}contest available`
+                : `Aucun concours ${filter !== 'all' ? (filter === 'active' ? 'en cours' : 'à venir') : 'disponible'}`}
+            </h3>
             <p>
-              {filter !== 'all' 
-                ? 'Essayez de changer de filtre pour voir d\'autres concours'
-                : 'Revenez bientôt pour découvrir nos prochains concours !'}
+              {filter !== 'all'
+                ? (isEn ? 'Try another filter to see more contests' : 'Essayez de changer de filtre pour voir d\'autres concours')
+                : (isEn ? 'Come back soon to discover upcoming contests!' : 'Revenez bientôt pour découvrir nos prochains concours !')}
             </p>
             {filter !== 'all' && (
               <button className="btn btn-primary" onClick={() => setFilter('all')}>
-                Voir tous les concours
+                {isEn ? 'View all contests' : 'Voir tous les concours'}
               </button>
             )}
           </div>
@@ -187,7 +207,9 @@ const Contests = () => {
           <>
             <div className="results-header">
               <h2 className="results-count">
-                {filteredContests.length} concours {filter === 'active' ? 'en cours' : filter === 'upcoming' ? 'à venir' : 'disponibles'}
+                {isEn
+                  ? `${filteredContests.length} ${filter === 'active' ? 'active' : filter === 'upcoming' ? 'upcoming' : 'available'} contests`
+                  : `${filteredContests.length} concours ${filter === 'active' ? 'en cours' : filter === 'upcoming' ? 'à venir' : 'disponibles'}`}
               </h2>
             </div>
 
@@ -203,19 +225,19 @@ const Contests = () => {
                       {status === 'active' && (
                         <>
                           <TrendingUp size={14} />
-                          <span>En cours</span>
+                          <span>{isEn ? 'Active' : 'En cours'}</span>
                         </>
                       )}
                       {status === 'upcoming' && (
                         <>
                           <Clock size={14} />
-                          <span>Bientôt</span>
+                          <span>{isEn ? 'Soon' : 'Bientôt'}</span>
                         </>
                       )}
                       {status === 'ended' && (
                         <>
                           <Award size={14} />
-                          <span>Terminé</span>
+                          <span>{isEn ? 'Ended' : 'Terminé'}</span>
                         </>
                       )}
                     </div>
@@ -237,14 +259,14 @@ const Contests = () => {
                       <div className="contest-detail">
                         <Calendar size={16} />
                         <span>
-                          Publié le {createdDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                          {isEn ? 'Published on' : 'Publié le'} {createdDate.toLocaleDateString(isEn ? 'en-US' : 'fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                         </span>
                       </div>
 
                       {status === 'active' && (
                         <div className="contest-detail highlight">
                           <TrendingUp size={16} />
-                          <span>Inscriptions ouvertes</span>
+                          <span>{isEn ? 'Registration open' : 'Inscriptions ouvertes'}</span>
                         </div>
                       )}
                     </div>
@@ -254,7 +276,7 @@ const Contests = () => {
                         to={`/contests/${contest.id}`} 
                         className={`btn ${status === 'active' ? 'btn-primary' : 'btn-outline'}`}
                       >
-                        {status === 'active' ? 'Participer maintenant' : 'Voir les détails'}
+                        {status === 'active' ? (isEn ? 'Join now' : 'Participer maintenant') : (isEn ? 'View details' : 'Voir les détails')}
                       </Link>
                     </div>
                   </div>

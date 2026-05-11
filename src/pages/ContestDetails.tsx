@@ -3,12 +3,27 @@ import { useParams, Link } from 'react-router-dom';
 import { Sparkles, Trophy, Calendar, Clock, Award, TrendingUp, ArrowLeft } from 'lucide-react';
 import type { ContestResponse } from '../types';
 import { getPublicContestDetails } from '../api/contestApi';
+import { useLanguage } from '../context/LanguageContext';
+import { useSEO } from '../utils/useSEO';
 
 const ContestDetails = () => {
+  const { language } = useLanguage();
+  const isEn = language === 'en';
   const { id } = useParams<{ id: string }>();
   const [contest, setContest] = useState<ContestResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useSEO({
+    title: contest?.title || (isEn ? 'Contest details' : 'Détails du concours'),
+    description:
+      (contest?.description || '').slice(0, 200) ||
+      (isEn
+        ? 'Contest details, requirements and registration on SNJobConnect.'
+        : "Détails du concours, conditions d'inscription et calendrier sur SNJobConnect."),
+    path: id ? `/contests/${id}` : '/contests',
+    type: 'article',
+  });
 
   useEffect(() => {
     const load = async () => {
@@ -18,13 +33,13 @@ const ContestDetails = () => {
       try {
         const data = await getPublicContestDetails(Number(id));
         if (!data) {
-          setError('Concours introuvable');
+          setError(isEn ? 'Contest not found' : 'Concours introuvable');
         } else {
           setContest(data);
         }
       } catch (err: any) {
         console.error('Erreur fetching contest details:', err);
-        setError(err?.message || 'Erreur lors du chargement du concours');
+        setError(err?.message || (isEn ? 'Error while loading contest' : 'Erreur lors du chargement du concours'));
       } finally {
         setLoading(false);
       }
@@ -39,10 +54,10 @@ const ContestDetails = () => {
           <div className="page-header-content">
             <div className="header-badge">
               <Sparkles size={16} />
-              <span>Concours & Défis</span>
+              <span>{isEn ? 'Contests & Challenges' : 'Concours & Défis'}</span>
             </div>
-            <h1>Détails du concours</h1>
-            <p className="header-subtitle">Informations et modalités d'inscription</p>
+            <h1>{isEn ? 'Contest details' : 'Détails du concours'}</h1>
+            <p className="header-subtitle">{isEn ? 'Information and registration terms' : 'Informations et modalités d\'inscription'}</p>
           </div>
         </div>
       </div>
@@ -51,14 +66,14 @@ const ContestDetails = () => {
         {loading && (
           <div className="loading-message">
             <div className="spinner" />
-            <p>Chargement du concours...</p>
+            <p>{isEn ? 'Loading contest...' : 'Chargement du concours...'}</p>
           </div>
         )}
 
         {error && (
           <div className="error-message">
             <p>{error}</p>
-            <Link to="/contests" className="btn btn-outline">Retour</Link>
+            <Link to="/contests" className="btn btn-outline">{isEn ? 'Back' : 'Retour'}</Link>
           </div>
         )}
 
@@ -80,12 +95,12 @@ const ContestDetails = () => {
                 {contest.status === 'PUBLISHED' ? (
                   <>
                     <TrendingUp size={16} />
-                    <span>En cours</span>
+                    <span>{isEn ? 'Active' : 'En cours'}</span>
                   </>
                 ) : (
                   <>
                     <Clock size={16} />
-                    <span>Bientôt</span>
+                    <span>{isEn ? 'Soon' : 'Bientôt'}</span>
                   </>
                 )}
               </div>
@@ -95,7 +110,7 @@ const ContestDetails = () => {
               <div className="contest-meta-info">
                 <div className="meta-info-item">
                   <Calendar size={18} />
-                  <span>Publié le {new Date(contest.createdAt).toLocaleDateString('fr-FR', { 
+                  <span>{isEn ? 'Published on' : 'Publié le'} {new Date(contest.createdAt).toLocaleDateString(isEn ? 'en-US' : 'fr-FR', { 
                     day: 'numeric', 
                     month: 'long', 
                     year: 'numeric' 
@@ -103,11 +118,11 @@ const ContestDetails = () => {
                 </div>
                 <div className="meta-info-item">
                   <Trophy size={18} />
-                  <span>Concours ouvert à tous</span>
+                  <span>{isEn ? 'Open to everyone' : 'Concours ouvert à tous'}</span>
                 </div>
                 <div className="meta-info-item">
                   <Award size={18} />
-                  <span>Récompenses à gagner</span>
+                  <span>{isEn ? 'Rewards to win' : 'Récompenses à gagner'}</span>
                 </div>
               </div>
             </div>
@@ -116,7 +131,7 @@ const ContestDetails = () => {
             <div className="contest-detail-section">
               <h3>
                 <Trophy size={20} />
-                <span>À propos du concours</span>
+                <span>{isEn ? 'About this contest' : 'À propos du concours'}</span>
               </h3>
               <div 
                 className="contest-description-rich" 
@@ -128,12 +143,12 @@ const ContestDetails = () => {
             <div className="contest-detail-actions">
               <Link to="/contests" className="btn btn-outline">
                 <ArrowLeft size={18} />
-                Retour aux concours
+                {isEn ? 'Back to contests' : 'Retour aux concours'}
               </Link>
               {contest.status === 'PUBLISHED' && (
                 <button className="btn btn-primary">
                   <Award size={18} />
-                  Participer maintenant
+                  {isEn ? 'Join now' : 'Participer maintenant'}
                 </button>
               )}
             </div>

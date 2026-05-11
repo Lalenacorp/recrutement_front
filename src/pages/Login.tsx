@@ -2,8 +2,20 @@ import { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Briefcase, AlertCircle, Info } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
+import { useSEO } from '../utils/useSEO';
 
 const Login = () => {
+  const { language } = useLanguage();
+  const isEn = language === 'en';
+
+  useSEO({
+    title: isEn ? 'Sign in' : 'Connexion',
+    description: isEn
+      ? 'Sign in to your SNJobConnect account to apply for jobs, track your applications and manage your profile.'
+      : "Connectez-vous à votre compte SNJobConnect pour postuler aux offres, suivre vos candidatures et gérer votre profil.",
+    path: '/login',
+  });
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -38,7 +50,7 @@ const Login = () => {
         navigate('/');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur de connexion');
+      setError(err instanceof Error ? err.message : (isEn ? 'Login error' : 'Erreur de connexion'));
     } finally {
       setLoading(false);
     }
@@ -49,15 +61,17 @@ const Login = () => {
       <div className="auth-container">
         <div className="auth-header">
           <Briefcase size={40} />
-          <h2>Connexion</h2>
-          <p>Bienvenue sur JobConnect</p>
+          <h2>{isEn ? 'Login' : 'Connexion'}</h2>
+          <p>{isEn ? 'Welcome to SNJobConnect' : 'Bienvenue sur SNJobConnect'}</p>
         </div>
 
         {sessionExpired && (
           <div className="alert alert-info" style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
             <Info size={20} />
             <span>
-              Votre session a expiré ou n&apos;est plus valide. Connectez-vous à nouveau pour continuer.
+              {isEn
+                ? 'Your session has expired or is no longer valid. Please log in again.'
+                : 'Votre session a expiré ou n&apos;est plus valide. Connectez-vous à nouveau pour continuer.'}
             </span>
           </div>
         )}
@@ -77,16 +91,16 @@ const Login = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="form-control"
-              placeholder="votre@email.com"
+              placeholder={isEn ? 'your@email.com' : 'votre@email.com'}
               required
             />
           </div>
           
           <div className="form-group">
             <div className="login-password-row">
-              <label>Mot de passe</label>
+              <label>{isEn ? 'Password' : 'Mot de passe'}</label>
               <Link to="/forgot-password" className="auth-link-inline">
-                Mot de passe oublié ?
+                {isEn ? 'Forgot password?' : 'Mot de passe oublié ?'}
               </Link>
             </div>
             <input
@@ -100,12 +114,12 @@ const Login = () => {
           </div>
           
           <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
-            {loading ? 'Connexion...' : 'Se connecter'}
+            {loading ? (isEn ? 'Signing in...' : 'Connexion...') : (isEn ? 'Sign in' : 'Se connecter')}
           </button>
         </form>
         
         <div className="auth-footer">
-          <p>Pas encore de compte ? <Link to="/register">Inscrivez-vous</Link></p>
+          <p>{isEn ? "Don't have an account?" : 'Pas encore de compte ?'} <Link to="/register">{isEn ? 'Sign up' : 'Inscrivez-vous'}</Link></p>
         </div>
       </div>
     </div>
