@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 
 const SITE_NAME = 'SNJobConnect';
 const SITE_URL = 'https://snjobconnect.com';
-const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.png`;
+const DEFAULT_OG_IMAGE = `${SITE_URL}/snjobconnect-brand-logo.png`;
 
 export interface SEOOptions {
   /** Page title — will be suffixed with "| SNJobConnect" automatically */

@@ -11,7 +11,7 @@ const Footer = () => {
         <div className="footer-container">
           <div className="footer-section footer-section--brand">
             <div className="footer-logo">
-              <img src="/snjobconnect-logo-cropped.png?v=2" alt="Logo SNJobConnect" className="brand-logo" />
+              <img src="/snjobconnect-brand-logo.png?v=20260512" alt="Logo SNJobConnect" className="brand-logo" />
             </div>
             <p className="footer-tagline">
               {isEn

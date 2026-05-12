@@ -6,13 +6,13 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#080410",
-  "theme_color": "#3B0764",
+  "background_color": "#F9FAFB",
+  "theme_color": "#00427E",
   "lang": "fr",
   "categories": ["business", "education", "productivity"],
   "icons": [
     {
-      "src": "/snjobconnect-site-icon.png",
+      "src": "/snjobconnect-brand-logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

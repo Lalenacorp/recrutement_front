@@ -24,7 +24,7 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="navbar-container">
         <Link to="/" className="navbar-logo" aria-label="SNJobConnect — accueil">
-          <img src="/navbar-logo-base.png?v=7" alt="Logo SNJobConnect" className="brand-logo" />
+          <img src="/snjobconnect-brand-logo.png?v=20260512" alt="Logo SNJobConnect" className="brand-logo" />
         </Link>
         
         {/* Menu hamburger button */}
