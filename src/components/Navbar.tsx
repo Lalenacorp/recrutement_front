@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { Briefcase, LogOut, User, Home, PlusCircle, FileText, Calendar, Trophy, Menu, X, GraduationCap } from 'lucide-react';
+import { LogOut, User, Home, PlusCircle, FileText, Calendar, Trophy, Menu, X, GraduationCap } from 'lucide-react';
 import { useState } from 'react';
 
 const Navbar = () => {
@@ -24,8 +24,7 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="navbar-container">
         <Link to="/" className="navbar-logo" aria-label="SNJobConnect — accueil">
-          <Briefcase size={28} />
-          <span>SNJobConnect</span>
+          <img src="/navbar-logo-base.png?v=7" alt="Logo SNJobConnect" className="brand-logo" />
         </Link>
         
         {/* Menu hamburger button */}

@@ -1,4 +1,4 @@
-import { Briefcase, Phone, MapPin } from 'lucide-react';
+import { Phone, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -11,8 +11,7 @@ const Footer = () => {
         <div className="footer-container">
           <div className="footer-section footer-section--brand">
             <div className="footer-logo">
-              <Briefcase size={28} aria-hidden />
-              <span>SNJobConnect</span>
+              <img src="/snjobconnect-logo-cropped.png?v=2" alt="Logo SNJobConnect" className="brand-logo" />
             </div>
             <p className="footer-tagline">
               {isEn
