@@ -381,13 +381,13 @@ const CandidateDashboard = () => {
                         <Link to={`/jobs/${m.jobId}`} className="btn btn-outline job-match-cta">
                           {isEn ? 'View offer' : 'Voir l&apos;offre'}
                         </Link>
-                       {/*  <button
+                        <button
                           type="button"
                           className="btn btn-primary job-match-cta"
                           onClick={() => openCvOptimizer(m.jobId)}
                         >
                           {isEn ? 'Optimize my CV with AI' : 'Optimiser mon CV avec IA'}
-                        </button> */}
+                        </button>
 
                         {cvOptimizerOpenForJobId === m.jobId && (
                           <div className="cv-optimizer-panel">
