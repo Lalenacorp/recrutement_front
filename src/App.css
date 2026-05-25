@@ -7816,8 +7816,35 @@ button.company-badge:focus-visible {
   max-width: 760px;
 }
 
+.study-canada-procedures-header {
+  padding: 2.5rem 0 0.5rem;
+  background: var(--neutral-100);
+  border-top: 1px solid var(--neutral-300);
+}
+
+.study-canada-procedures-header .section-badge {
+  text-transform: none;
+  letter-spacing: 0.02em;
+  margin-bottom: 1rem;
+  gap: 0.4rem;
+}
+
+.study-canada-procedures-header h2 {
+  font-size: clamp(1.5rem, 3.5vw, 2rem);
+  margin: 0 0 0.65rem;
+  color: var(--neutral-900);
+}
+
+.study-canada-procedures-header p {
+  color: var(--neutral-600);
+  max-width: 720px;
+  margin: 0;
+  line-height: 1.6;
+}
+
 .study-canada-body {
-  padding: 2rem 0 4rem;
+  padding: 1.5rem 0 4rem;
+  background: var(--neutral-100);
 }
 
 .study-canada-main-layout {
@@ -8243,4 +8270,865 @@ button.company-badge:focus-visible {
   max-width: 170px;
   padding: 0.35rem 0.5rem;
   font-size: 0.9rem;
+}
+
+/* ——— Conseiller IA orientation (Espace Étudiant) ——— */
+.orientation-advisor-section {
+  padding: 2rem 0 4rem;
+  background: linear-gradient(180deg, var(--neutral-100) 0%, var(--white) 100%);
+  border-top: 1px solid var(--neutral-300);
+}
+
+.orientation-advisor-container {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.orientation-advisor-badge {
+  text-transform: none;
+  letter-spacing: 0.02em;
+  margin-bottom: 1rem;
+}
+
+.orientation-advisor-title {
+  color: var(--neutral-900);
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  margin: 0 0 0.75rem;
+}
+
+.orientation-advisor-subtitle {
+  color: var(--neutral-600);
+  font-size: 1.05rem;
+  max-width: 640px;
+  margin: 0 auto 1.75rem;
+  line-height: 1.6;
+}
+
+.orientation-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-bottom: 2rem;
+}
+
+.orientation-suggestion-chip {
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--primary-light);
+  background: var(--white);
+  color: var(--primary-dark);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  font-family: inherit;
+  box-shadow: var(--shadow-sm);
+}
+
+.orientation-suggestion-chip:hover:not(:disabled) {
+  background: #eaf4ff;
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.orientation-suggestion-chip:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.orientation-chat-widget {
+  text-align: left;
+  background: var(--white);
+  border-radius: 16px;
+  border: 1px solid var(--neutral-300);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.orientation-chat-header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--neutral-300);
+  background: linear-gradient(180deg, #eaf4ff 0%, var(--white) 100%);
+}
+
+.orientation-chat-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--primary-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  flex-shrink: 0;
+  box-shadow: var(--shadow-md);
+}
+
+.orientation-chat-header-text strong {
+  display: block;
+  color: var(--neutral-900);
+  font-size: 1rem;
+  margin-bottom: 0.2rem;
+}
+
+.orientation-chat-status {
+  font-size: 0.78rem;
+  color: var(--neutral-600);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.orientation-rag-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--success);
+  display: inline-block;
+}
+
+.orientation-chat-messages {
+  min-height: 280px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: var(--neutral-100);
+}
+
+.orientation-message {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  max-width: 92%;
+}
+
+.orientation-message-user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.orientation-message-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--primary-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  flex-shrink: 0;
+}
+
+.orientation-message-bubble {
+  padding: 0.85rem 1.1rem;
+  border-radius: 14px;
+  background: var(--white);
+  border: 1px solid var(--neutral-300);
+  color: var(--neutral-800);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  box-shadow: var(--shadow-sm);
+}
+
+.orientation-message-bubble p {
+  margin: 0;
+}
+
+.orientation-message-bubble p + p {
+  margin-top: 0.5rem;
+}
+
+.orientation-message-user .orientation-message-bubble {
+  background: var(--primary-gradient);
+  border-color: transparent;
+  color: var(--white);
+  box-shadow: var(--shadow-md);
+}
+
+.orientation-message-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--neutral-600);
+}
+
+.orientation-spinner {
+  animation: orientation-spin 0.8s linear infinite;
+  color: var(--primary);
+}
+
+@keyframes orientation-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.orientation-chat-error {
+  margin: 0 1.25rem 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+  font-size: 0.9rem;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.orientation-chat-input-row {
+  display: flex;
+  gap: 0.65rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--neutral-300);
+  background: var(--white);
+}
+
+.orientation-chat-input {
+  flex: 1;
+  resize: none;
+  min-height: 48px;
+  max-height: 120px;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--neutral-300);
+  background: var(--neutral-100);
+  color: var(--neutral-900);
+  font-family: inherit;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.orientation-chat-input::placeholder {
+  color: var(--neutral-500);
+}
+
+.orientation-chat-input:focus {
+  outline: none;
+  border-color: var(--primary-light);
+  background: var(--white);
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.15);
+}
+
+.orientation-chat-send {
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 12px;
+  background: var(--primary-gradient);
+  color: var(--white);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: var(--shadow-md);
+}
+
+.orientation-chat-send:hover:not(:disabled) {
+  transform: scale(1.03);
+  box-shadow: var(--shadow-lg);
+}
+
+.orientation-chat-send:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .orientation-suggestion-chip {
+    font-size: 0.8rem;
+    padding: 0.45rem 0.75rem;
+  }
+
+  .orientation-message {
+    max-width: 100%;
+  }
+}
+
+/* ——— Comparer les frais de scolarité (Espace Étudiant) ——— */
+.tuition-compare-section {
+  padding: 2.5rem 0 3rem;
+  background: var(--neutral-100);
+  border-bottom: 1px solid var(--neutral-300);
+}
+
+.tuition-compare-badge {
+  text-transform: none;
+  letter-spacing: 0.02em;
+  margin-bottom: 1rem;
+}
+
+.tuition-compare-title {
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  margin: 0 0 0.65rem;
+  color: var(--neutral-900);
+}
+
+.tuition-compare-subtitle {
+  color: var(--neutral-600);
+  max-width: 640px;
+  margin: 0 0 1.75rem;
+  line-height: 1.6;
+}
+
+.tuition-compare-table-wrap {
+  background: var(--white);
+  border: 1px solid var(--neutral-300);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tuition-compare-table {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.tuition-compare-table thead th {
+  text-align: left;
+  padding: 1rem 1.25rem;
+  font-weight: 700;
+  color: var(--neutral-900);
+  border-bottom: 1px solid var(--neutral-300);
+  background: var(--white);
+}
+
+.tuition-compare-table thead th:not(:first-child) {
+  text-align: right;
+}
+
+.tuition-compare-table tbody th {
+  text-align: left;
+  padding: 1rem 1.25rem;
+  font-weight: 600;
+  color: var(--neutral-900);
+  border-bottom: 1px solid var(--neutral-200);
+}
+
+.tuition-compare-table tbody td {
+  padding: 1rem 1.25rem;
+  text-align: right;
+  color: var(--neutral-700);
+  border-bottom: 1px solid var(--neutral-200);
+  white-space: nowrap;
+}
+
+.tuition-compare-table tbody tr:last-child th,
+.tuition-compare-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.tuition-compare-yes {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  color: #15803d;
+  font-weight: 600;
+}
+
+.tuition-compare-no {
+  color: var(--neutral-500);
+  font-weight: 500;
+}
+
+.tuition-compare-footnote {
+  margin: 1rem 0 0;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--neutral-500);
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .tuition-compare-table {
+    font-size: 0.875rem;
+  }
+
+  .tuition-compare-table thead th,
+  .tuition-compare-table tbody th,
+  .tuition-compare-table tbody td {
+    padding: 0.85rem 1rem;
+  }
+}
+
+/* ——— Calculer son budget (Espace Étudiant) ——— */
+.budget-calc-section {
+  padding: 2.5rem 0 3rem;
+  background: var(--white);
+  border-bottom: 1px solid var(--neutral-300);
+}
+
+.budget-calc-badge {
+  text-transform: none;
+  letter-spacing: 0.02em;
+  margin-bottom: 1rem;
+}
+
+.budget-calc-title {
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  margin: 0 0 0.65rem;
+  color: var(--neutral-900);
+}
+
+.budget-calc-subtitle {
+  color: var(--neutral-600);
+  max-width: 640px;
+  margin: 0 0 1.75rem;
+  line-height: 1.6;
+}
+
+.budget-calc-card {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  background: var(--white);
+  border: 1px solid var(--neutral-300);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.budget-calc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.budget-calc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.budget-calc-field-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--neutral-700);
+}
+
+.budget-calc-field-period {
+  font-weight: 500;
+  color: var(--neutral-500);
+}
+
+.budget-calc-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  padding: 0 0.85rem;
+  background: var(--neutral-100);
+  border: 1px solid var(--neutral-300);
+  border-radius: 10px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.budget-calc-input-wrap:focus-within {
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.12);
+  background: var(--white);
+}
+
+.budget-calc-input-wrap input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--neutral-900);
+  background: transparent;
+}
+
+.budget-calc-input-wrap input::placeholder {
+  color: var(--neutral-400);
+  opacity: 1;
+}
+
+.budget-calc-currency {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--neutral-500);
+}
+
+.budget-calc-result {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.15rem 1.25rem;
+  margin-bottom: 1.25rem;
+  background: linear-gradient(135deg, #eaf4ff 0%, #f0f7ff 100%);
+  border: 1px solid rgba(0, 102, 204, 0.15);
+  border-radius: 12px;
+}
+
+.budget-calc-result-label {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--neutral-600);
+  margin-bottom: 0.25rem;
+}
+
+.budget-calc-result-value {
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
+  font-weight: 800;
+  color: var(--neutral-900);
+  line-height: 1.3;
+}
+
+.budget-calc-result-period {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--neutral-600);
+}
+
+.budget-calc-scholarships-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #15803d;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.budget-calc-scholarships-link:hover {
+  text-decoration: underline;
+  color: #166534;
+}
+
+.budget-calc-submit {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 10px;
+  font-size: 1rem;
+}
+
+@media (max-width: 640px) {
+  .budget-calc-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .budget-calc-card {
+    padding: 1.15rem;
+  }
+
+  .budget-calc-result {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ——— Trouver une école (Espace Étudiant) ——— */
+.school-finder-section {
+  padding: 2.5rem 0 3rem;
+  background: var(--white);
+  border-bottom: 1px solid var(--neutral-300);
+}
+
+.school-finder-badge {
+  text-transform: none;
+  letter-spacing: 0.02em;
+  margin-bottom: 1rem;
+}
+
+.school-finder-title {
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  margin: 0 0 0.65rem;
+  color: var(--neutral-900);
+}
+
+.school-finder-subtitle {
+  color: var(--neutral-600);
+  max-width: 640px;
+  margin: 0 0 1.75rem;
+  line-height: 1.6;
+}
+
+.school-finder-search {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.75rem;
+  padding: 0.85rem;
+  background: var(--neutral-100);
+  border: 1px solid var(--neutral-300);
+  border-radius: 14px;
+  margin-bottom: 2rem;
+}
+
+.school-finder-search-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1 1 200px;
+  min-height: 48px;
+  padding: 0 0.85rem;
+  background: var(--white);
+  border: 1px solid var(--neutral-300);
+  border-radius: 10px;
+  color: var(--neutral-500);
+}
+
+.school-finder-search-field:focus-within {
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.12);
+}
+
+.school-finder-search-field input,
+.school-finder-search-field select {
+  flex: 1;
+  border: none;
+  outline: none;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--neutral-900);
+  background: transparent;
+  min-width: 0;
+}
+
+.school-finder-search-region select {
+  cursor: pointer;
+}
+
+.school-finder-search-btn {
+  flex: 0 0 auto;
+  min-height: 48px;
+  padding-left: 1.75rem;
+  padding-right: 1.75rem;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.school-finder-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.school-card {
+  background: var(--white);
+  border: 1px solid var(--neutral-300);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.school-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.school-card-image-wrap {
+  height: 160px;
+  background: linear-gradient(135deg, #eaf4ff 0%, #d4e8ff 100%);
+  overflow: hidden;
+}
+
+.school-card-image-wrap.school-card-image-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-gradient);
+}
+
+.school-image-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: var(--white);
+  text-align: center;
+  padding: 1rem;
+}
+
+.school-image-placeholder span {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 800;
+  font-size: 1.35rem;
+  letter-spacing: 0.06em;
+}
+
+.school-image-placeholder--modal span {
+  font-size: 1.75rem;
+}
+
+.school-image-placeholder--modal svg {
+  width: 48px;
+  height: 48px;
+}
+
+.school-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.school-card-body {
+  padding: 1.1rem 1.15rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.school-card-title {
+  font-size: 1.1rem;
+  margin: 0 0 0.25rem;
+  color: var(--neutral-900);
+}
+
+.school-card-type {
+  font-size: 0.88rem;
+  color: var(--neutral-600);
+  margin: 0 0 0.75rem;
+}
+
+.school-card-meta {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--neutral-600);
+}
+
+.school-card-meta li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.school-card-profile-link {
+  margin-top: auto;
+  align-self: center;
+  border: none;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--primary);
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  transition: color 0.2s;
+}
+
+.school-card-profile-link:hover {
+  color: var(--primary-light);
+}
+
+.school-finder-empty {
+  text-align: center;
+  color: var(--neutral-600);
+  padding: 2rem 1rem;
+  background: var(--neutral-100);
+  border-radius: 12px;
+}
+
+.school-profile-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.school-profile-modal {
+  position: relative;
+  width: min(520px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: var(--shadow-xl);
+}
+
+.school-profile-modal-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 2;
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--neutral-700);
+}
+
+.school-profile-modal-image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  background-color: var(--neutral-200);
+  display: block;
+}
+
+.school-profile-modal-image-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-gradient);
+}
+
+.school-profile-modal-content {
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.school-profile-modal-content h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1.35rem;
+}
+
+.school-profile-type {
+  color: var(--neutral-600);
+  margin: 0 0 0.85rem;
+  font-weight: 500;
+}
+
+.school-profile-modal-content p {
+  color: var(--neutral-700);
+  line-height: 1.6;
+  margin: 0 0 1rem;
+}
+
+.school-profile-website {
+  display: inline-flex;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .school-finder-search {
+    flex-direction: column;
+  }
+
+  .school-finder-search-btn {
+    width: 100%;
+  }
 }

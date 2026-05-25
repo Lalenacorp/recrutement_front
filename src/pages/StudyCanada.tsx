@@ -13,6 +13,10 @@ import { submitPreInscription } from '../api/preInscriptionApi';
 import { ApiError } from '../api/authApi';
 import { useLanguage } from '../context/LanguageContext';
 import { useSEO } from '../utils/useSEO';
+import OrientationAdvisorChat from '../components/OrientationAdvisorChat';
+import SchoolFinderSection from '../components/SchoolFinderSection';
+import TuitionComparisonSection from '../components/TuitionComparisonSection';
+import BudgetCalculatorSection from '../components/BudgetCalculatorSection';
 
 const DOSSIER_PIECES_FR = [
   'Une fiche de renseignement à remplir',
@@ -110,7 +114,7 @@ const StudyCanada = () => {
   const isEn = language === 'en';
 
   useSEO({
-    title: isEn ? 'Study in Canada from Senegal' : 'Étudier au Canada depuis le Sénégal',
+    title: isEn ? 'Student Space — SNJobConnect' : 'Espace Étudiant — SNJobConnect',
     description: isEn
       ? 'Complete program to study in Canada from Senegal: admissions, visa, accommodation and support. Apply with SNJobConnect today.'
       : "Programme complet pour étudier au Canada depuis le Sénégal : admissions, visa, logement et accompagnement. Lancez votre pré-inscription sur SNJobConnect.",
@@ -284,11 +288,34 @@ const StudyCanada = () => {
       <section className="study-canada-hero">
         <div className="container">
           <span className="section-badge">{isEn ? 'Student Space' : 'Espace Étudiant'}</span>
-          <h1>{isEn ? 'Registration and procedures — Student Space' : 'Inscription et procédures — Espace Étudiant'}</h1>
+          <h1>{isEn ? 'Student Space' : 'Espace Étudiant'}</h1>
+          <p>
+            {isEn
+              ? 'Find a school in Senegal, get guidance from our AI advisor, and complete your study abroad file (Canada) with SNJobConnect.'
+              : "Trouvez une école au Sénégal, bénéficiez du conseiller IA d'orientation et préparez votre dossier d'études à l'étranger (Canada) avec SNJobConnect."}
+          </p>
+        </div>
+      </section>
+
+      <SchoolFinderSection />
+
+      <TuitionComparisonSection />
+
+      <BudgetCalculatorSection />
+
+      <section className="study-canada-procedures-header" aria-labelledby="study-procedures-title">
+        <div className="container">
+          <span className="section-badge">
+            <FileText size={14} aria-hidden />
+            {isEn ? 'Registration' : 'Inscription'}
+          </span>
+          <h2 id="study-procedures-title">
+            {isEn ? 'Registration and procedures' : 'Inscription et procédures'}
+          </h2>
           <p>
             {isEn
               ? 'File opening, required documents, fees and information form for your study project.'
-              : 'Ouverture de dossier pédagogique, pièces à fournir, frais et formulaire de renseignements pour votre projet d&apos;études.'}
+              : "Ouverture de dossier pédagogique, pièces à fournir, frais et formulaire de renseignements pour votre projet d'études."}
           </p>
         </div>
       </section>
@@ -644,6 +671,8 @@ const StudyCanada = () => {
           </article>
         </div>
       </section>
+
+      <OrientationAdvisorChat />
     </div>
   );
 };

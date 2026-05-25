@@ -19,7 +19,10 @@ import {
   Send,
   CheckCircle2,
   XCircle,
-  GraduationCap
+  GraduationCap,
+  School,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
 import {
   adminApi,
@@ -35,8 +38,45 @@ import type { ContestResponse, EventResponse } from '../types';
 import { useSEO } from '../utils/useSEO';
 import ChangePasswordForm from '../components/ChangePasswordForm';
 import ConfirmModal from '../components/ConfirmModal';
+import {
+  createSchool,
+  deleteSchool,
+  listAdminSchools,
+  updateSchool,
+  type SchoolCreateRequest,
+  type SchoolResponse,
+} from '../api/schoolApi';
+import { SENEGAL_REGIONS } from '../data/senegalSchools';
 
-type MenuItem = 'dashboard' | 'users' | 'contests' | 'events' | 'preinscriptions';
+type MenuItem = 'dashboard' | 'users' | 'contests' | 'events' | 'preinscriptions' | 'schools';
+
+type SchoolFormState = {
+  name: string;
+  typeFr: string;
+  typeEn: string;
+  city: string;
+  region: string;
+  domainsText: string;
+  website: string;
+  imageUrl: string;
+  descriptionFr: string;
+  descriptionEn: string;
+  published: boolean;
+};
+
+const EMPTY_SCHOOL_FORM: SchoolFormState = {
+  name: '',
+  typeFr: '',
+  typeEn: '',
+  city: '',
+  region: 'Dakar',
+  domainsText: '',
+  website: '',
+  imageUrl: '',
+  descriptionFr: '',
+  descriptionEn: '',
+  published: true,
+};
 type ContentType = 'contest' | 'event';
 
 const PRE_INSCRIPTION_FIELD_LABELS: Record<string, string> = {
@@ -125,6 +165,14 @@ const AdminDashboard = () => {
   const [preInscriptionDetail, setPreInscriptionDetail] = useState<PreInscriptionDetail | null>(null);
   const [preInscriptionDetailOpen, setPreInscriptionDetailOpen] = useState(false);
   const [loadingPreInscriptionDetail, setLoadingPreInscriptionDetail] = useState(false);
+
+  const [schools, setSchools] = useState<SchoolResponse[]>([]);
+  const [loadingSchools, setLoadingSchools] = useState(false);
+  const [schoolError, setSchoolError] = useState<string | null>(null);
+  const [showSchoolForm, setShowSchoolForm] = useState(false);
+  const [editingSchoolId, setEditingSchoolId] = useState<number | null>(null);
+  const [schoolForm, setSchoolForm] = useState<SchoolFormState>(EMPTY_SCHOOL_FORM);
+  const [schoolSubmitting, setSchoolSubmitting] = useState(false);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -185,6 +233,8 @@ const AdminDashboard = () => {
       loadUsers(userFilter);
     } else if (activeMenu === 'preinscriptions') {
       loadPreInscriptions();
+    } else if (activeMenu === 'schools') {
+      loadSchools();
     }
   }, [activeMenu, userFilter]);
 
@@ -419,6 +469,95 @@ const AdminDashboard = () => {
     } finally {
       setLoadingPreInscriptions(false);
     }
+  };
+
+  const resetSchoolForm = () => {
+    setSchoolForm(EMPTY_SCHOOL_FORM);
+    setEditingSchoolId(null);
+  };
+
+  const loadSchools = async () => {
+    try {
+      setLoadingSchools(true);
+      setSchoolError(null);
+      const data = await listAdminSchools();
+      setSchools(data);
+    } catch (err: any) {
+      setSchoolError(err.message || 'Erreur lors du chargement des écoles');
+    } finally {
+      setLoadingSchools(false);
+    }
+  };
+
+  const buildSchoolPayload = (): SchoolCreateRequest => ({
+    name: schoolForm.name.trim(),
+    typeFr: schoolForm.typeFr.trim(),
+    typeEn: schoolForm.typeEn.trim(),
+    city: schoolForm.city.trim(),
+    region: schoolForm.region,
+    domains: schoolForm.domainsText
+      .split(/[,;]+/)
+      .map((d) => d.trim())
+      .filter(Boolean),
+    website: schoolForm.website.trim() || undefined,
+    imageUrl: schoolForm.imageUrl.trim() || undefined,
+    descriptionFr: schoolForm.descriptionFr.trim(),
+    descriptionEn: schoolForm.descriptionEn.trim(),
+    published: schoolForm.published,
+  });
+
+  const handleSchoolSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSchoolSubmitting(true);
+    setSchoolError(null);
+    try {
+      const payload = buildSchoolPayload();
+      if (editingSchoolId !== null) {
+        await updateSchool(editingSchoolId, payload);
+      } else {
+        await createSchool(payload);
+      }
+      resetSchoolForm();
+      setShowSchoolForm(false);
+      await loadSchools();
+    } catch (err: any) {
+      setSchoolError(err.message || "Erreur lors de l'enregistrement");
+    } finally {
+      setSchoolSubmitting(false);
+    }
+  };
+
+  const startEditSchool = (school: SchoolResponse) => {
+    setEditingSchoolId(school.id);
+    setSchoolForm({
+      name: school.name,
+      typeFr: school.typeFr,
+      typeEn: school.typeEn,
+      city: school.city,
+      region: school.region,
+      domainsText: (school.domains ?? []).join(', '),
+      website: school.website ?? '',
+      imageUrl: school.imageUrl ?? '',
+      descriptionFr: school.descriptionFr,
+      descriptionEn: school.descriptionEn,
+      published: school.published,
+    });
+    setShowSchoolForm(true);
+  };
+
+  const handleDeleteSchool = (id: number, name: string) => {
+    openConfirm(
+      `Supprimer l'école « ${name} » ? Cette action est irréversible.`,
+      async () => {
+        await deleteSchool(id);
+        if (editingSchoolId === id) {
+          resetSchoolForm();
+          setShowSchoolForm(false);
+        }
+        await loadSchools();
+      },
+      'Supprimer une école'
+    );
   };
 
   const openPreInscriptionDetail = async (id: number) => {
@@ -923,6 +1062,14 @@ const AdminDashboard = () => {
             <span>Pré-inscriptions Canada</span>
           </button>
 
+          <button
+            className={`nav-item ${activeMenu === 'schools' ? 'active' : ''}`}
+            onClick={() => setActiveMenu('schools')}
+          >
+            <School size={20} />
+            <span>Écoles</span>
+          </button>
+
         </nav>
 
         <div className="sidebar-footer">
@@ -1162,6 +1309,263 @@ const AdminDashboard = () => {
               </div>
             )}
 
+          </div>
+        )}
+
+        {activeMenu === 'schools' && (
+          <div className="admin-dashboard-content">
+            <div className="dashboard-header-section">
+              <div>
+                <h1>Gestion des écoles</h1>
+                <p className="text-muted">
+                  Ajoutez les établissements affichés dans l&apos;Espace Étudiant (Trouver une école).
+                </p>
+              </div>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => {
+                  if (showSchoolForm && editingSchoolId === null) {
+                    setShowSchoolForm(false);
+                    resetSchoolForm();
+                  } else {
+                    resetSchoolForm();
+                    setShowSchoolForm(true);
+                  }
+                }}
+              >
+                <PlusCircle size={18} />
+                {showSchoolForm && editingSchoolId === null ? 'Fermer' : 'Ajouter une école'}
+              </button>
+            </div>
+
+            {showSchoolForm && (
+              <div className="admin-form">
+                <h3>{editingSchoolId !== null ? 'Modifier l\'école' : 'Nouvelle école'}</h3>
+                <form onSubmit={handleSchoolSubmit}>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Nom *</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={schoolForm.name}
+                        onChange={(e) => setSchoolForm({ ...schoolForm, name: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Ville *</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={schoolForm.city}
+                        onChange={(e) => setSchoolForm({ ...schoolForm, city: e.target.value })}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Type (FR) *</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="École de commerce"
+                        value={schoolForm.typeFr}
+                        onChange={(e) => setSchoolForm({ ...schoolForm, typeFr: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Type (EN) *</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Business school"
+                        value={schoolForm.typeEn}
+                        onChange={(e) => setSchoolForm({ ...schoolForm, typeEn: e.target.value })}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Région *</label>
+                      <select
+                        className="form-control"
+                        value={schoolForm.region}
+                        onChange={(e) => setSchoolForm({ ...schoolForm, region: e.target.value })}
+                        required
+                      >
+                        {SENEGAL_REGIONS.map((r) => (
+                          <option key={r} value={r}>
+                            {r}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>Domaines (séparés par des virgules)</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="marketing, commerce, digital"
+                        value={schoolForm.domainsText}
+                        onChange={(e) => setSchoolForm({ ...schoolForm, domainsText: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Site web</label>
+                      <input
+                        type="url"
+                        className="form-control"
+                        value={schoolForm.website}
+                        onChange={(e) => setSchoolForm({ ...schoolForm, website: e.target.value })}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>URL de l&apos;image (optionnel)</label>
+                      <input
+                        type="url"
+                        className="form-control"
+                        value={schoolForm.imageUrl}
+                        onChange={(e) => setSchoolForm({ ...schoolForm, imageUrl: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label>Description (FR) *</label>
+                    <textarea
+                      className="form-control"
+                      rows={3}
+                      value={schoolForm.descriptionFr}
+                      onChange={(e) => setSchoolForm({ ...schoolForm, descriptionFr: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Description (EN) *</label>
+                    <textarea
+                      className="form-control"
+                      rows={3}
+                      value={schoolForm.descriptionEn}
+                      onChange={(e) => setSchoolForm({ ...schoolForm, descriptionEn: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="checkbox-inline">
+                      <input
+                        type="checkbox"
+                        checked={schoolForm.published}
+                        onChange={(e) => setSchoolForm({ ...schoolForm, published: e.target.checked })}
+                      />
+                      <span>Publiée sur l&apos;Espace Étudiant</span>
+                    </label>
+                  </div>
+                  <div className="form-actions">
+                    <button
+                      type="button"
+                      className="btn btn-outline"
+                      onClick={() => {
+                        setShowSchoolForm(false);
+                        resetSchoolForm();
+                      }}
+                    >
+                      Annuler
+                    </button>
+                    <button type="submit" className="btn btn-primary" disabled={schoolSubmitting}>
+                      {schoolSubmitting
+                        ? 'Enregistrement…'
+                        : editingSchoolId !== null
+                          ? 'Mettre à jour'
+                          : 'Ajouter l\'école'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {schoolError && (
+              <div className="error-message">
+                <p>{schoolError}</p>
+              </div>
+            )}
+
+            <div className="content-list">
+              {loadingSchools && (
+                <div className="loading-message">
+                  <div className="spinner"></div>
+                  <p>Chargement des écoles…</p>
+                </div>
+              )}
+
+              {!loadingSchools && schools.length === 0 && (
+                <div className="empty-state">
+                  <School size={48} />
+                  <p>Aucune école enregistrée</p>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => {
+                      resetSchoolForm();
+                      setShowSchoolForm(true);
+                    }}
+                  >
+                    Ajouter la première école
+                  </button>
+                </div>
+              )}
+
+              {!loadingSchools &&
+                schools.map((school) => (
+                  <div key={school.id} className="content-item-card">
+                    <div className="contest-main-info">
+                      <div>
+                        <div className="contest-header-row">
+                          <h3>{school.name}</h3>
+                          <span
+                            className={`status-badge ${school.published ? 'status-published' : 'status-draft'}`}
+                          >
+                            {school.published ? 'Publiée' : 'Masquée'}
+                          </span>
+                        </div>
+                        <p className="text-muted contest-description">
+                          {school.typeFr} — {school.city}, {school.region}
+                        </p>
+                        {school.domains?.length > 0 && (
+                          <p className="text-muted contest-meta">
+                            Domaines : {school.domains.join(', ')}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="content-item-actions">
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline"
+                        onClick={() => startEditSchool(school)}
+                        title="Modifier"
+                      >
+                        <Pencil size={16} />
+                        Modifier
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline"
+                        onClick={() => handleDeleteSchool(school.id, school.name)}
+                        title="Supprimer"
+                      >
+                        <Trash2 size={16} />
+                        Supprimer
+                      </button>
+                    </div>
+                  </div>
+                ))}
+            </div>
           </div>
         )}
 
