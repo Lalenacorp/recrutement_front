@@ -6,6 +6,7 @@ import {
 } from '../api/orientationAdvisorApi';
 import { ApiError } from '../api/authApi';
 import { useLanguage } from '../context/LanguageContext';
+import { ORIENTATION_ADVISOR_PREFILL_KEY } from '../data/trendingTrainings';
 
 const SUGGESTED_FR = [
   'Quelle filière choisir après un Bac S ?',
@@ -46,10 +47,19 @@ const OrientationAdvisorChat = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const prefillHandled = useRef(false);
+  const skipChatScrollRef = useRef(true);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    if (skipChatScrollRef.current) {
+      skipChatScrollRef.current = false;
+      return;
+    }
+    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
   }, [messages, loading]);
 
   const sendMessage = useCallback(
@@ -96,6 +106,22 @@ const OrientationAdvisorChat = () => {
     },
     [isEn, loading, messages]
   );
+
+  useEffect(() => {
+    if (prefillHandled.current) return;
+    try {
+      const prefill = sessionStorage.getItem(ORIENTATION_ADVISOR_PREFILL_KEY);
+      if (!prefill?.trim()) return;
+      sessionStorage.removeItem(ORIENTATION_ADVISOR_PREFILL_KEY);
+      prefillHandled.current = true;
+      queueMicrotask(() => {
+        document.getElementById('orientation-advisor-title')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        void sendMessage(prefill.trim());
+      });
+    } catch {
+      /* ignore */
+    }
+  }, [sendMessage]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -161,7 +187,13 @@ const OrientationAdvisorChat = () => {
             </div>
           </header>
 
-          <div className="orientation-chat-messages" role="log" aria-live="polite" aria-relevant="additions">
+          <div
+            ref={messagesContainerRef}
+            className="orientation-chat-messages"
+            role="log"
+            aria-live="polite"
+            aria-relevant="additions"
+          >
             {messages.map((msg) => (
               <div
                 key={msg.id}

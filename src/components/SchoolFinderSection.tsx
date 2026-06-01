@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { GraduationCap, MapPin, Search, X } from 'lucide-react';
+import { GraduationCap, MapPin, Search, Sparkles, X } from 'lucide-react';
 import { listPublicSchools } from '../api/schoolApi';
+import { useCompatibilityProfile } from '../context/CompatibilityProfileContext';
 import { useLanguage } from '../context/LanguageContext';
 import {
   mapSchoolResponseToSenegalSchool,
@@ -65,6 +66,7 @@ function SchoolCardMedia({ school }: { school: SenegalSchool }) {
 const SchoolFinderSection = () => {
   const { language } = useLanguage();
   const isEn = language === 'en';
+  const { matchBySchoolId, hasCalculated } = useCompatibilityProfile();
 
   const [query, setQuery] = useState('');
   const [region, setRegion] = useState('');
@@ -102,7 +104,7 @@ const SchoolFinderSection = () => {
 
   const filteredSchools = useMemo(() => {
     const q = normalize(appliedQuery.trim());
-    return schools.filter((school) => {
+    const list = schools.filter((school) => {
       if (appliedRegion && school.region !== appliedRegion) return false;
       if (!q) return true;
       const haystack = normalize(
@@ -110,7 +112,15 @@ const SchoolFinderSection = () => {
       );
       return haystack.includes(q);
     });
-  }, [appliedQuery, appliedRegion, schools]);
+    if (hasCalculated) {
+      return [...list].sort((a, b) => {
+        const ma = matchBySchoolId.get(a.id)?.matchPercent ?? -1;
+        const mb = matchBySchoolId.get(b.id)?.matchPercent ?? -1;
+        return mb - ma;
+      });
+    }
+    return list;
+  }, [appliedQuery, appliedRegion, schools, hasCalculated, matchBySchoolId]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,6 +143,14 @@ const SchoolFinderSection = () => {
             ? 'Explore the best schools and universities in Senegal. Filter by field, region and budget.'
             : 'Explorez les meilleures écoles et universités du Sénégal. Filtrez par domaine, région et budget.'}
         </p>
+        {hasCalculated && (
+          <p className="school-finder-compat-hint">
+            <Sparkles size={14} aria-hidden />
+            {isEn
+              ? 'Schools are sorted by your compatibility score.'
+              : 'Les écoles sont triées selon votre score de compatibilité.'}
+          </p>
+        )}
 
         <form className="school-finder-search" onSubmit={handleSearch}>
           <label className="school-finder-search-field school-finder-search-query">
@@ -177,11 +195,20 @@ const SchoolFinderSection = () => {
           </p>
         ) : (
           <div className="school-finder-grid">
-            {filteredSchools.map((school) => (
+            {filteredSchools.map((school) => {
+              const match = matchBySchoolId.get(school.id);
+              return (
               <article key={school.id} className="school-card">
                 <SchoolCardMedia school={school} />
                 <div className="school-card-body">
-                  <h3 className="school-card-title">{school.name}</h3>
+                  <div className="school-card-title-row">
+                    <h3 className="school-card-title">{school.name}</h3>
+                    {match && (
+                      <span className="school-card-compat-pill" title={isEn ? 'Compatibility score' : 'Score de compatibilité'}>
+                        {match.matchPercent}%
+                      </span>
+                    )}
+                  </div>
                   <p className="school-card-type">{isEn ? school.typeEn : school.typeFr}</p>
                   <ul className="school-card-meta">
                     <li>
@@ -201,7 +228,8 @@ const SchoolFinderSection = () => {
                   </button>
                 </div>
               </article>
-            ))}
+            );
+            })}
           </div>
         )}
       </div>
@@ -241,6 +269,37 @@ const SchoolFinderSection = () => {
             )}
             <div className="school-profile-modal-content">
               <h3 id="school-profile-title">{selectedSchool.name}</h3>
+              {(() => {
+                const match = matchBySchoolId.get(selectedSchool.id);
+                if (!match) return null;
+                return (
+                  <div className="school-profile-compat" aria-label={isEn ? 'Compatibility with your profile' : 'Compatibilité avec votre profil'}>
+                    <p className="school-profile-compat-overall">
+                      <Sparkles size={16} aria-hidden />
+                      <strong>{match.matchPercent}%</strong>
+                      <span>{isEn ? 'compatibility' : 'de compatibilité'}</span>
+                    </p>
+                    <ul className="school-profile-compat-bars">
+                      <li>
+                        <span>{isEn ? 'Academic' : 'Académique'}</span>
+                        <span>{match.academicScore}%</span>
+                      </li>
+                      <li>
+                        <span>{isEn ? 'Budget' : 'Budget'}</span>
+                        <span>{match.budgetScore}%</span>
+                      </li>
+                      <li>
+                        <span>{isEn ? 'Location' : 'Localisation'}</span>
+                        <span>{match.locationScore}%</span>
+                      </li>
+                      <li>
+                        <span>{isEn ? 'Career' : 'Débouchés'}</span>
+                        <span>{match.careerScore}%</span>
+                      </li>
+                    </ul>
+                  </div>
+                );
+              })()}
               <p className="school-profile-type">
                 {isEn ? selectedSchool.typeEn : selectedSchool.typeFr}
               </p>

@@ -11,17 +11,33 @@ import { authFetch } from './authFetch';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
 
+function defaultApiErrorMessage(status: number): string {
+  switch (status) {
+    case 401:
+      return 'Session expirée. Reconnectez-vous.';
+    case 403:
+      return 'Accès refusé par le serveur. En local, utilisez le backend sur le port 8080 (voir .env).';
+    case 503:
+      return "L'optimisation IA n'est pas activée sur le serveur (clé API manquante).";
+    case 502:
+      return 'Le fournisseur IA a renvoyé une erreur. Réessayez plus tard.';
+    default:
+      return 'Erreur serveur';
+  }
+}
+
 async function readJson<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const raw = await response.text().catch(() => '');
-    let msg = response.statusText || 'Erreur serveur';
+    let msg = defaultApiErrorMessage(response.status);
     let fieldErrors: Record<string, string[]> | undefined;
     try {
       const errorData = raw ? (JSON.parse(raw) as Record<string, unknown>) : {};
       if (errorData.errors && typeof errorData.errors === 'object') {
         fieldErrors = errorData.errors as Record<string, string[]>;
       }
-      if (typeof errorData.message === 'string') msg = errorData.message;
+      if (typeof errorData.detail === 'string') msg = errorData.detail;
+      else if (typeof errorData.message === 'string') msg = errorData.message;
       else if (typeof errorData.error === 'string') msg = errorData.error;
       else if (raw && !raw.startsWith('{')) msg = raw;
     } catch {
